@@ -1,0 +1,76 @@
+from libs import*
+
+# ==== Tool cụ thể: vẽ Polygon ====
+class PolygonTool(MouseTool):
+    '''
+    Tool để sử dụng cho mục đích vẽ hình polygon chọn từng điểm một
+    '''
+    def __init__(self):
+        """Tool để vẽ polygon (đa giác)."""
+        self.points = []   # danh sách điểm [(x,y), (x,y), ...]
+        self.is_finished = False  # cờ đánh dấu đã chốt polygon chưa
+
+    def on_mouse_down(self, event) -> None:
+        """
+        Thêm điểm mới vào polygon khi click chuột.
+        Nếu click gần điểm đầu tiên và số điểm >= 3 thì coi như khép polygon.
+        """
+        if self.is_finished:
+            return
+
+        x, y = event.x(), event.y()
+
+        self.points.append((x, y))
+
+        if self.points:
+            # kiểm tra click gần điểm đầu tiên => khép polygon
+            x0, y0 = self.points[0]
+            if len(self.points) >= 3 and abs(x - x0) < 10 and abs(y - y0) < 10:
+                self.is_finished = True
+                return
+
+        
+    
+
+    def on_mouse_move(self, event) -> None:
+        """Có thể vẽ preview đường tạm từ điểm cuối đến chuột."""
+        pass  # tuỳ bạn muốn có preview không (nối điểm cuối tới chuột hiện tại)
+
+    def on_mouse_up(self, event) -> None:
+        """Không cần gì đặc biệt."""
+        pass
+
+    def undo_point(self) -> None:
+        """Xoá điểm cuối cùng khi đang vẽ."""
+        # if self.points and not self.is_finished:
+        if self.points:
+            self.points.pop()
+            self.is_finished= False
+
+    def get_shape(self):
+        """Trả polygon khi đã hoàn tất (is_finished=True)."""
+        if self.is_finished and len(self.points) >= 3:
+            return ("polygon", self.points)
+        return None
+
+    def draw(self, painter) -> None:
+        """Vẽ polygon đang thao tác."""
+        if not self.points:
+            return
+
+        pen = QPen(Qt.red, 2)
+        painter.setPen(pen)
+        painter.setBrush(QBrush(QColor(255, 0, 0, 50)))  # nền mờ
+
+        # nếu đã khép kín
+        if self.is_finished:
+            polygon = QPolygon([QPoint(x, y) for x, y in self.points])
+            painter.drawPolygon(polygon)
+        else:
+            # vẽ polyline chưa đóng
+            for i in range(len(self.points) - 1):
+                painter.drawLine(self.points[i][0], self.points[i][1],
+                                 self.points[i+1][0], self.points[i+1][1])
+            # vẽ điểm đầu + điểm cuối
+            for (x, y) in self.points:
+                painter.drawEllipse(QPoint(x, y), 3, 3)
