@@ -66,4 +66,4 @@ coverage.xml
 # Database / local data
 *.sqlite3
 *.db
-data/
+# data/
