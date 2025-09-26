@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1129</width>
-    <height>738</height>
+    <width>1127</width>
+    <height>731</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -165,7 +165,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QFrame" name="frame_2">
+              <widget class="QGroupBox" name="groupBox_2">
                <property name="palette">
                 <palette>
                  <active>
@@ -628,8 +628,8 @@
                 <string notr="true">border-color: rgb(0, 0, 0);
 </string>
                </property>
-               <property name="frameShape">
-                <enum>QFrame::Box</enum>
+               <property name="title">
+                <string>Tool Shape</string>
                </property>
                <layout class="QGridLayout" name="gridLayout">
                 <item row="0" column="0">
@@ -747,9 +747,9 @@
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="frame_3">
-               <property name="frameShape">
-                <enum>QFrame::Box</enum>
+              <widget class="QGroupBox" name="groupBox_3">
+               <property name="title">
+                <string>Adjus Camera</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_2">
                 <item row="1" column="0">
@@ -794,9 +794,9 @@
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="frame_4">
-               <property name="frameShape">
-                <enum>QFrame::Box</enum>
+              <widget class="QGroupBox" name="groupBox_4">
+               <property name="title">
+                <string>Image Processing</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_3">
                 <item row="0" column="0">
@@ -831,9 +831,9 @@
               </widget>
              </item>
              <item>
-              <widget class="QFrame" name="frame_5">
-               <property name="frameShape">
-                <enum>QFrame::Box</enum>
+              <widget class="QGroupBox" name="groupBox_5">
+               <property name="title">
+                <string>List Image</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_4">
                 <item row="0" column="0">
@@ -1101,7 +1101,7 @@
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -1114,7 +1114,7 @@
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset resource="resource_rc.qrc">
+                        <iconset>
                          <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                          <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                        </property>
@@ -1153,7 +1153,7 @@
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -1166,7 +1166,423 @@
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset resource="resource_rc.qrc">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_13">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_6">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_6">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_4">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_16">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_7">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_7">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_5">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_17">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_8">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_8">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_6">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_18">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_9">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_9">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_7">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_19">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_10">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_10">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_8">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_20">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_11">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_11">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_9">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_21">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_12">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_12">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_10">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
+                         <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
+                         <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame_22">
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_13">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="lb_13">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="pixmap">
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="fd_11">
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="icon">
+                        <iconset>
                          <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                          <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                        </property>
@@ -1205,7 +1621,7 @@
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
+                        <pixmap>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -1218,7 +1634,7 @@
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset resource="resource_rc.qrc">
+                        <iconset>
                          <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                          <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                        </property>
