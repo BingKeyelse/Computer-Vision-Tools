@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</file>
+    <file>Icon/add_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/close_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/deployed_code_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/engineering_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/group_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/home_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/login_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/logout_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/menu_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/settings_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/speed_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/user_attributes_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+    <file>Icon/view_headline_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</file>
+  </qresource>
+</RCC>
