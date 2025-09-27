@@ -21,7 +21,7 @@ class Canvas(QLabel):
         """
         if self.orig_image:
             # Scale ảnh theo kích thước của widget giờ ta có ảnh đã scale
-            self._image_scaled = self.orig_image.scaled(
+            self.image_scaled = self.orig_image.scaled(
                 self.width(), self.height(),
                 Qt.KeepAspectRatio, # giữ nguyên tỷ lệ khung hình (không méo ảnh).
                 Qt.SmoothTransformation # dùng thuật toán nội suy mượt (chậm hơn nhưng chất lượng tốt).
@@ -30,12 +30,12 @@ class Canvas(QLabel):
             # Tính toán offset để căn giữa vì chưa chắc 2 widget và ảnh đã fix với nhau
             # Là số pixel dịch để căn giữa ảnh trong widget, không phải tỉ lệ.
             # Do lệnh Qt.KeepAspectRatio
-            self.x_offset = (self.width() - self._image_scaled.width()) // 2
-            self.y_offset = (self.height() - self._image_scaled.height()) // 2
+            self.x_offset = (self.width() - self.image_scaled.width()) // 2
+            self.y_offset = (self.height() - self.image_scaled.height()) // 2
             print(f'Giá trị offset {self.x_offset}  {self.y_offset}')
 
             # Tính tỉ lệ so với ảnh gốc 
-            self.ratio_base_image = (self._image_scaled.width() / self.orig_image.width(), self._image_scaled.height() / self.orig_image.height())
+            self.ratio_base_image = (self.image_scaled.width() / self.orig_image.width(), self.image_scaled.height() / self.orig_image.height())
 
             # Sau khi có tỉ lệ này muốn suy ra tọa độ điểm ảnh trên ảnh gốc. Theo cthuc bên dưới
             # x_img = (event.x() - x_offset) / ratio
@@ -63,23 +63,25 @@ class Canvas(QLabel):
         pixmap = QPixmap.fromImage(qimg)
         return pixmap
     
-    def in_image_area(self, x, y):
+    def in_image_area(self, x: int, y: int)-> bool:
+        """
+        Để xem là trỏ chuột có ở trong khung hình hay không """
         if not self.orig_image:
             return False
 
-        return (self.x_offset <= x <= self.x_offset + self._image_scaled.width() and
-                self.y_offset <= y <= self.y_offset + self._image_scaled.height())
+        return (self.x_offset <= x <= self.x_offset + self.image_scaled.width() and
+                self.y_offset <= y <= self.y_offset + self.image_scaled.height())
     
-    def set_tool_manager(self, manager):
+    def set_tool_manager(self, manager)-> None:
         """
         Gắn ToolManager cho canvas. 
         Nếu manager = None thì không làm gì cả.
         """
         self.tool_manager = manager
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event)->None:
         """
-        Sự kiện chuột nhấn. 
+        Sự kiện chuột nhấn --> ToolManager
         Nếu tool_manager = None thì return None (bỏ qua).
         """
         if self.in_image_area(event.x(), event.y()):
@@ -87,25 +89,25 @@ class Canvas(QLabel):
                 self.tool_manager.handle_event("mouse_down", event, self.x_offset, self.y_offset)
             self.update()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event)-> None:
         """
-        Sự kiện chuột di chuyển.
+        Sự kiện chuột di chuyển --> ToolManager
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:        
                 self.tool_manager.handle_event("mouse_move", event, self.x_offset, self.y_offset, self.scale_paramater)
             self.update()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event)-> None:
         """
-        Sự kiện chuột nhả ra.
+        Sự kiện chuột nhả ra --> ToolManager
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:
                 self.tool_manager.handle_event("mouse_up", event, self.x_offset, self.y_offset)
             self.update()
 
-    def paintEvent(self, event):
+    def paintEvent(self, event)-> None:
         """
         Hàm vẽ lại giao diện. 
         Gọi super().paintEvent để QLabel vẽ ảnh gốc trước,
@@ -119,11 +121,11 @@ class Canvas(QLabel):
         """ 
         super().paintEvent(event)
         # print('Có thay đổi theo')
-        if self._image_scaled:
+        if self.image_scaled:
             painter = QPainter(self)
 
             # vẽ lại ảnh ở vị trí offset và với kích thước được scale
-            painter.drawPixmap(self.x_offset, self.y_offset, self._image_scaled)
+            painter.drawPixmap(self.x_offset, self.y_offset, self.image_scaled)
 
         if self.tool_manager:
             # painter = QPainter(self) # QPainter chính là cây cọ trong Qt,
@@ -181,11 +183,18 @@ class MainWindow(QMainWindow):
         self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.undo(), self.canvas.update()))
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
     
-    def init_UX_UI(self):
+    def init_UX_UI(self)-> None:
+        """
+        Dùng để setup toàn bộ khởi tạo liên quan tới UX-UI
+        """
         self.ui.btn_polyundo.hide()
 
     
-    def change_tool(self, tool_name):
+    def change_tool(self, tool_name)-> None:
+        """
+        Hàm lựa chọn để thay đổi các shape tool cho ToolManager
+        """
+        
         self.ui.btn_polyundo.hide()
         if tool_name == "Box":
             self.tool_manager.set_tool(BoxTool())

@@ -12,12 +12,12 @@ class ToolManager:
         self.counter = 0   # để đánh số id
 
     def set_tool(self, tool: MouseTool): # type hint ( gợi ý kiểu)
-        """Chọn tool hiện tại (có thể là None)."""
+        """Chọn tool hiện tại để biết sẽ vẽ shape gì Box, Circle, Oriented Box, Polygon."""
 
         self.active_tool = tool
 
     def handle_event(self, event_type, event, x_offset=0, y_offset=0, scaled=0.0)-> None:
-        """Gửi event cho tool đang active."""
+        """Gửi event cho tool đang active. như nhấn, nhả, di chuyển với chuột đang được chọn"""
 
         if not self.active_tool:
             return
@@ -29,7 +29,7 @@ class ToolManager:
             self.active_tool.on_mouse_up(event)
     
     def cut(self)-> None:
-        """Chấp nhận hình hiện tại và reset tool."""
+        """Nhận hình hiện tại và reset tool."""
 
         if self.active_tool:
             shape = self.active_tool.get_shape()
@@ -62,8 +62,8 @@ class ToolManager:
 
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
         """Vẽ các hình đã chấp nhận + hình đang thao tác."""
-        # ox, oy = x_offset, y_offset  # offset khi căn giữa ảnh
-        print(f'Giá trị offset trên này+++++++++ {x_offset} {y_offset}')
+
+        # Xem qua các shape mà mình đã chấp nhận 
         for shape in self.shapes:
             print(shape)
             if shape[0] == "box":
@@ -81,8 +81,6 @@ class ToolManager:
                 # Thay đổi sang tọa độ tương đối so với Widget
                 x1, y1 = x1_scaled + x_offset, y1_scaled + y_offset
                 x2, y2 = x2_scaled + x_offset, y2_scaled + y_offset
-
-                # print(f"Giá trị thực sự của điểm này sau biến đổi lần lượt là {(x1,y1)} và {(x2,y2)}")
 
                 painter.drawRect(int(x1), int(y1), int(x2 - x1), int(y2 - y1))
                 # vẽ id cạnh hình
@@ -133,6 +131,7 @@ class ToolManager:
                     # vẽ ID
                     painter.setPen(Qt.yellow)  # ID màu đen cho dễ đọc
                     painter.drawText(points[0][0], points[0][1] - 5, f"ID:{idx}")
+                    
             elif shape[0] == "oriented_box":
                 _, start, end, angle, idx = shape  # nếu bạn muốn đánh số id giống box
                 # Lấy 4 đỉnh sau khi xoay

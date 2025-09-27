@@ -11,6 +11,10 @@ from pyqt5_ui.gui import Ui_MainWindow
 
 # ==== Base class cho tất cả tools ====
 class MouseTool:
+    """
+    Hàm cơ sở của toàn bộ thao tác chuột gồm:
+    nhấn. di, nhả, vẽ hình, trả lại shape cho ToolManager
+    """
     def on_mouse_down(self, event, _offset=0, y_offset=0): pass
     def on_mouse_move(self, event, x_offset=0, y_offset=0, scaled=0.0): pass
     def on_mouse_up(self, event, _offset=0, y_offset=0): pass

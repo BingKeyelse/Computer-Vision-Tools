@@ -71,9 +71,8 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             return
 
         x, y = event.x(), event.y()
-        # print(f"Giá trị thực sự của điểm end là {(x,y)}")
-        # print('Sao không chạy ở đây nữa')
         # print(x - x_offset, y - y_offset) # Trả về lại tọa độ so với ảnh đang nằm bên trong widget
+        
         if self.mode == "move":
             # dịch chuyển cả hình
             x1, y1 = self.start
@@ -132,6 +131,7 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             self.end_img_scaled   = (x2 - x_offset, y2 - y_offset)
 
             # Tọa độ trên ảnh thực tế
+            # Đây là bước tính toán để truyền thẳng cho self.get_shape vì tính global của biến
             self.start_img = (self.start_img_scaled[0] / ratio_base_image[0],
                   self.start_img_scaled[1] / ratio_base_image[1])
             self.end_img = (self.end_img_scaled[0] / ratio_base_image[0],
@@ -160,7 +160,6 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             # painter.drawLine(cx - 5, cy, cx + 5, cy)
             # painter.drawLine(cx, cy - 5, cx, cy + 5)
     
-    ## Thêm
     def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int]]:
         """
         Lấy tên của shape và giá trị start, end để lưu mẫu
