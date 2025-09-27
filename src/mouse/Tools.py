@@ -16,7 +16,7 @@ class ToolManager:
 
         self.active_tool = tool
 
-    def handle_event(self, event_type, event)-> None:
+    def handle_event(self, event_type, event, x_offset=0, y_offset=0, scaled=0.0)-> None:
         """Gửi event cho tool đang active."""
 
         if not self.active_tool:
@@ -24,7 +24,7 @@ class ToolManager:
         if event_type == "mouse_down":
             self.active_tool.on_mouse_down(event)
         elif event_type == "mouse_move":
-            self.active_tool.on_mouse_move(event)
+            self.active_tool.on_mouse_move(event, x_offset, y_offset, scaled)
         elif event_type == "mouse_up":
             self.active_tool.on_mouse_up(event)
     
@@ -60,15 +60,30 @@ class ToolManager:
         if isinstance(self.active_tool, PolygonTool):
             self.active_tool.undo_point()
 
-    def draw(self, painter, x_offset=0, y_offset=0)-> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
         """Vẽ các hình đã chấp nhận + hình đang thao tác."""
-
+        # ox, oy = x_offset, y_offset  # offset khi căn giữa ảnh
+        print(f'Giá trị offset trên này+++++++++ {x_offset} {y_offset}')
         for shape in self.shapes:
+            print(shape)
             if shape[0] == "box":
                 _, start, end, idx = shape
                 painter.setPen(QPen(Qt.blue, 2))
-                x1, y1 = start
-                x2, y2 = end
+                # Không thay đổi
+                # x1, y1 = start
+                # x2, y2 = end
+
+                # Nhận được tọa độ ảnh thực giờ biến sang ảnh scaled
+                x1_scaled, y1_scaled = int(start[0] *ratio_base_image[0]), int(start[1] *ratio_base_image[1])
+                x2_scaled, y2_scaled = int(end[0] *ratio_base_image[0]), int(end[1] *ratio_base_image[1])
+
+
+                # Thay đổi sang tọa độ tương đối so với Widget
+                x1, y1 = x1_scaled + x_offset, y1_scaled + y_offset
+                x2, y2 = x2_scaled + x_offset, y2_scaled + y_offset
+
+                # print(f"Giá trị thực sự của điểm này sau biến đổi lần lượt là {(x1,y1)} và {(x2,y2)}")
+
                 painter.drawRect(int(x1), int(y1), int(x2 - x1), int(y2 - y1))
                 # vẽ id cạnh hình
                 painter.setPen(Qt.yellow)
@@ -156,4 +171,4 @@ class ToolManager:
 
         # vẽ hình đang thao tác (chưa cut)
         if self.active_tool:
-            self.active_tool.draw(painter)
+            self.active_tool.draw(painter, x_offset, y_offset, ratio_base_image)

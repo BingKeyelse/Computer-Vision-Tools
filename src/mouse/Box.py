@@ -16,9 +16,11 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
         ## Thêm chức năng điều chỉnh
         self.mode = None  # "move", "resize", hoặc None
         self.offset = (0, 0)
+        self.start_img= None
+        self.end_img= None
 
 
-    def on_mouse_down(self, event)-> None:
+    def on_mouse_down(self, event, x_offset=0, y_offset=0)-> None:
         """
         Thời điểm khi ấn xuống là xem có gần tâm của hình, hay cạnh nào không
         Nếu không khai báo giá trị toạ độ cho cả start và end mới
@@ -58,7 +60,7 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             self.end = self.start
 
 
-    def on_mouse_move(self, event)-> None:
+    def on_mouse_move(self, event, x_offset=0, y_offset=0, scaled=0.0)-> None:
         """
         Khi chuột di chuyển thì cập nhập lại với từ mode đang ở hiện tại
         Nếu không ở mode nào thì cập nhập lại end
@@ -69,7 +71,9 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             return
 
         x, y = event.x(), event.y()
-        print(x,y)
+        # print(f"Giá trị thực sự của điểm end là {(x,y)}")
+        # print('Sao không chạy ở đây nữa')
+        # print(x - x_offset, y - y_offset) # Trả về lại tọa độ so với ảnh đang nằm bên trong widget
         if self.mode == "move":
             # dịch chuyển cả hình
             x1, y1 = self.start
@@ -110,15 +114,28 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
         self.mode = None
         
 
-    def draw(self, painter, x_offset=0, y_offset=0)-> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
         """
         Vẽ hình chữ nhật với khung đỏ, tâm hình và nền mờ trong suốt.
         Hình chữ nhật được vẽ bởi painter lấy từ ToolManager truyền cho
         
         """
+        ox, oy = x_offset, y_offset  # offset khi căn giữa ảnh
         if self.start and self.end:
             x1, y1 = self.start
             x2, y2 = self.end
+
+            print(f'Giá trị offset trên này==== {x_offset} {y_offset}')
+
+            # Trừ offset để ra tọa độ trên ảnh scaled
+            self.start_img_scaled = (x1 - x_offset, y1 - y_offset)
+            self.end_img_scaled   = (x2 - x_offset, y2 - y_offset)
+
+            # Tọa độ trên ảnh thực tế
+            self.start_img = (self.start_img_scaled[0] / ratio_base_image[0],
+                  self.start_img_scaled[1] / ratio_base_image[1])
+            self.end_img = (self.end_img_scaled[0] / ratio_base_image[0],
+                self.end_img_scaled[1] / ratio_base_image[1])
 
             # Chuẩn hóa tọa độ (tránh trường hợp kéo ngược chuột)
             left, top = min(x1, x2), min(y1, y2)
@@ -144,11 +161,13 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             # painter.drawLine(cx, cy - 5, cx, cy + 5)
     
     ## Thêm
-    def get_shape(self)-> tuple[str, int, int]:
+    def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int]]:
         """
         Lấy tên của shape và giá trị start, end để lưu mẫu
         
         """
-        if self.start and self.end:
-            return ("box", self.start, self.end)
+        if self.start_img and self.end_img:
+            # Trả lại theo tọa độ tuyệt đối so với ảnh
+            return ("box", self.start_img, self.end_img)
         return None
+    
