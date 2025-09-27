@@ -13,30 +13,40 @@ class Canvas(QLabel):
         self.tool_manager = None
     
     def resizeEvent(self, event):
+        """
+        Hàm event handler có sẵn của Qt
+        Khi widget đổi kích thước (ví dụ bạn kéo giãn cửa sổ), Qt tự động gọi hàm này.
+        Ta override để cập nhật lại cách hiển thị ảnh.
+        """
         if self.orig_image:
-            # Scale ảnh theo khung label
+            # Scale ảnh theo kích thước của widget
             self.scaled = self.orig_image.scaled(
                 self.width(), self.height(),
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation
+                Qt.KeepAspectRatio, # giữ nguyên tỷ lệ khung hình (không méo ảnh).
+                Qt.SmoothTransformation # dùng thuật toán nội suy mượt (chậm hơn nhưng chất lượng tốt).
             )
 
-            # tính toán offset để căn giữa
+            # Tính toán offset để căn giữa vì chưa chắc 2 widget và ảnh đã fix với nhau
+            # Do lệnh Qt.KeepAspectRatio
             self.x_offset = (self.width() - self.scaled.width()) // 2
             self.y_offset = (self.height() - self.scaled.height()) // 2
 
-        # Qt có sẵn event system, mỗi khi widget thay đổi kích thước thì Qt sẽ gọi tự động resizeEvent.
+        # Qt có sẵn event system, mỗi khi Widget thay đổi sẽ gọi tự động resizeEvent.
         super().resizeEvent(event)
         
 
     def cvimg_to_qpixmap(self, cv_img):
         """
-        Chuyển ảnh từ OpenCV (numpy array BGR) → QPixmap để hiển thị trong QLabel,
+        Chuyển ảnh từ OpenCV (numpy array BGR) → QPixmap để hiển thị trong QLabel
+        Bởi vì Qlabel cần là đối tượng ở dạng QPixmap hoặc QImage
         """
         if cv_img is None:
             return None
 
+        # Qt dùng chuẩn vơi RGB
         rgb_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+
+        # Tính toán để chuyển
         h, w, ch = rgb_img.shape
         bytes_per_line = ch * w
         qimg = QImage(rgb_img.data, w, h, bytes_per_line, QImage.Format_RGB888)
@@ -113,10 +123,29 @@ class MainWindow(QMainWindow):
 
         image_ori= cv2.imread(r'src\data\images\image.jpg')
 
-        # Tạo canvas và gắn vào QLabel có sẵn trong ui
-        self.canvas = Canvas(image_ori, parent=self.ui.screen_main) # Nơi để hiển thị và là nơi thao tác chính
-        self.canvas.setGeometry(self.ui.screen_main.rect())  # khớp kích thước với label
+        # Tạo canvas và gắn vào QLabel có sẵn trong ui. Chúng nằm đè lên chứ không phải là một
+        self.canvas = Canvas(image_ori, parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
 
+        # How to debug with widget to set fix with label
+        # geometry() Thì lấy theo tọa độ của cha
+        # rect(): Thì lấy theo tọa độ cục bộ
+        # self.canvas.setGeometry(self.ui.screen_main.geometry())  # khớp kích thước với label
+        # self.canvas.setGeometry(self.ui.screen_main.rect())
+        # self.canvas.setStyleSheet("background-color: rgba(255, 0, 0, 100);") 
+
+        # print("screen_main size:", self.ui.screen_main.width(), self.ui.screen_main.height())
+        # print("canvas size:", self.canvas.width(), self.canvas.height())
+        # QTimer.singleShot(100, lambda: print(
+        #     "AFTER SHOW:",
+        #     self.ui.screen_main.width(), self.ui.screen_main.height(),
+        #     self.canvas.width(), self.canvas.height()
+        # ))
+
+        layout = QVBoxLayout(self.ui.screen_main) # Gắn 1 layout để quản lý toàn bộ thông tin bên trong của label
+        layout.setContentsMargins(0,0,0,0) # Bỏ hết viền (margin) không sẽ để mặc định là 9
+        layout.addWidget(self.canvas) # Bỏ canvas vào nó sẽ chiếm toàn bộ không gian trong label
+
+        
         self.tool_manager = ToolManager() # Đạo diễn, người chỉ định dùng tool nào
         self.canvas.set_tool_manager(self.tool_manager)
 

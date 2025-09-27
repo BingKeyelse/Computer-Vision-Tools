@@ -3,9 +3,9 @@ import cv2
 import numpy as np
 import math
 from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtCore import Qt, QPoint, QPointF
+from PyQt5.QtCore import Qt, QPoint, QPointF, QTimer
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QBrush, QColor, QPolygon, QPainterPath, QPolygonF
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QApplication, QWidget, QPushButton, QVBoxLayout
 
 from pyqt5_ui.gui import Ui_MainWindow
 
