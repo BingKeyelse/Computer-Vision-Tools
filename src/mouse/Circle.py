@@ -14,6 +14,13 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         ## Thêm chức năng điều chỉnh
         self.mode = None  # "move", "resize", hoặc None
         self.offset = (0, 0)
+        self.start_img= None
+        self.end_img= None
+
+    def reset_image(self)-> None:
+        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
+        self.start = None
+        self.end = None
 
     def on_mouse_down(self, event)-> None:
         """Xử lý sự kiện nhấn chuột."""
@@ -48,7 +55,7 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         len_y= (A[1]-B[1])**2
         return np.sqrt(len_x + len_y)
 
-    def on_mouse_move(self, event)-> None:
+    def on_mouse_move(self, event, x_offset=0, y_offset=0)-> None:
         """Xử lý sự kiện rê chuột."""
 
         if not self.start or not self.end:
@@ -76,12 +83,24 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
 
         self.mode = None
 
-    def draw(self, painter) -> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0) -> None:
         """Vẽ hình tròn hiện tại lên canvas, gồm viền, tâm và lớp phủ mờ."""
 
         if self.start and self.end:
             x1, y1 = self.start
             x2, y2 = self.end
+
+            # Trừ offset để ra tọa độ trên ảnh scaled
+            self.start_img_scaled = (x1 - x_offset, y1 - y_offset)
+            self.end_img_scaled   = (x2 - x_offset, y2 - y_offset)
+
+            # Tọa độ trên ảnh thực tế
+            # Đây là bước tính toán để truyền thẳng cho self.get_shape vì tính global của biến
+            self.start_img = (self.start_img_scaled[0] / ratio_base_image[0],
+                  self.start_img_scaled[1] / ratio_base_image[1])
+            self.end_img = (self.end_img_scaled[0] / ratio_base_image[0],
+                self.end_img_scaled[1] / ratio_base_image[1])
+
             # Tính bán kính = khoảng cách từ start đến end
             r = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
 
@@ -111,6 +130,6 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
     def get_shape(self)-> None:
         """Trả về dữ liệu hình tròn (hoặc None nếu chưa có)."""
 
-        if self.start and self.end:
-            return ("circle", self.start, self.end)
+        if self.start_img and self.end_img:
+            return ("circle", self.start_img, self.end_img)
         return None

@@ -24,9 +24,15 @@ class ToolManager:
         if event_type == "mouse_down":
             self.active_tool.on_mouse_down(event)
         elif event_type == "mouse_move":
-            self.active_tool.on_mouse_move(event, x_offset, y_offset, scaled)
+            self.active_tool.on_mouse_move(event, x_offset, y_offset)
         elif event_type == "mouse_up":
             self.active_tool.on_mouse_up(event)
+
+    def reset(self)-> None:
+        """
+        Khi để reset lại hình khi mà nó đang được vẽ
+        """
+        self.active_tool.reset_image()
     
     def cut(self)-> None:
         """Nhận hình hiện tại và reset tool."""
@@ -61,7 +67,10 @@ class ToolManager:
             self.active_tool.undo_point()
 
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
-        """Vẽ các hình đã chấp nhận + hình đang thao tác."""
+        """Vẽ các hình đã chấp nhận + hình đang thao tác.
+        Chuyển đổi vị trí tuyệt đối với ảnh thực tế kích thước thật
+        sang vị trí tuyệt đối so với ảnh scaled rồi tiếp tới mới là Widget
+        """
 
         # Xem qua các shape mà mình đã chấp nhận 
         for shape in self.shapes:
@@ -69,6 +78,7 @@ class ToolManager:
             if shape[0] == "box":
                 _, start, end, idx = shape
                 painter.setPen(QPen(Qt.blue, 2))
+
                 # Không thay đổi
                 # x1, y1 = start
                 # x2, y2 = end
@@ -96,8 +106,18 @@ class ToolManager:
             elif shape[0] == "circle":
                 _, start, end, idx = shape
                 painter.setPen(QPen(Qt.blue, 2))
-                x1, y1 = start
-                x2, y2 = end
+                # x1, y1 = start
+                # x2, y2 = end
+
+                # Nhận được tọa độ ảnh thực giờ biến sang ảnh scaled
+                x1_scaled, y1_scaled = int(start[0] *ratio_base_image[0]), int(start[1] *ratio_base_image[1])
+                x2_scaled, y2_scaled = int(end[0] *ratio_base_image[0]), int(end[1] *ratio_base_image[1])
+
+                # Thay đổi sang tọa độ tương đối so với Widget
+                x1, y1 = x1_scaled + x_offset, y1_scaled + y_offset
+                x2, y2 = x2_scaled + x_offset, y2_scaled + y_offset
+
+
                 # Tính bán kính = khoảng cách từ start đến end
                 r = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
                 painter.drawEllipse(x1 - r, y1 - r, 2*r, 2*r)
@@ -114,29 +134,50 @@ class ToolManager:
             elif shape[0] == "polygon":
                 _, points, idx = shape
                 painter.setPen(QPen(Qt.blue, 2))
-                for i in range(len(points)):
-                    x1, y1 = points[i]
-                    x2, y2 = points[(i+1) % len(points)]
-                    painter.drawLine(x1, y1, x2, y2)
 
-                    # đủ 3 điểm thì coi như polygon
+                qpoints = []
+                for (x_img, y_img) in points:
+                    # 1. Ảnh gốc → scaled
+                    x_scaled = int(x_img * ratio_base_image[0])
+                    y_scaled = int(y_img * ratio_base_image[1])
+
+                    # 2. Scaled → widget
+                    x = x_scaled + x_offset
+                    y = y_scaled + y_offset
+
+                    qpoints.append(QPoint(x, y))
+
+                # Vẽ polygon
+                if len(qpoints) >= 3:  # đủ 3 điểm thì mới khép kín polygon
                     pen = QPen(Qt.blue, 2)
-                    brush = QBrush(QColor(0, 0, 255, 20))  # xanh, alpha=50 để mờ
+                    brush = QBrush(QColor(0, 0, 255, 40))  # xanh, alpha=40 để mờ
                     painter.setPen(pen)
                     painter.setBrush(brush)
-
-                    qpoints = [QPoint(x, y) for x, y in points]
                     painter.drawPolygon(QPolygon(qpoints))
 
-                    # vẽ ID
-                    painter.setPen(Qt.yellow)  # ID màu đen cho dễ đọc
-                    painter.drawText(points[0][0], points[0][1] - 5, f"ID:{idx}")
+                # # Vẽ từng cạnh (phòng trường hợp polyline chưa khép kín)
+                # for i in range(len(qpoints) - 1):
+                #     painter.drawLine(qpoints[i], qpoints[i+1])
+
+                # Vẽ ID
+                if qpoints:
+                    painter.setPen(Qt.yellow)
+                    painter.drawText(qpoints[0].x(), qpoints[0].y() - 5, f"ID:{idx}")
                     
             elif shape[0] == "oriented_box":
                 _, start, end, angle, idx = shape  # nếu bạn muốn đánh số id giống box
+
+                # Nhận được tọa độ ảnh thực giờ biến sang ảnh scaled
+                x1_scaled, y1_scaled = int(start[0] *ratio_base_image[0]), int(start[1] *ratio_base_image[1])
+                x2_scaled, y2_scaled = int(end[0] *ratio_base_image[0]), int(end[1] *ratio_base_image[1])
+
+                # Thay đổi sang tọa độ tương đối so với Widget
+                x1, y1 = x1_scaled + x_offset, y1_scaled + y_offset
+                x2, y2 = x2_scaled + x_offset, y2_scaled + y_offset
+            
                 # Lấy 4 đỉnh sau khi xoay
-                cx, cy = ( (start[0]+end[0])/2, (start[1]+end[1])/2 )
-                w, h = abs(end[0]-start[0]), abs(end[1]-start[1])
+                cx, cy = ( (x1+x2)/2, (y1+y2)/2 )
+                w, h = abs(x2-x1), abs(y2-y1)
                 
                 # Tọa độ box chuẩn (chưa xoay) so với tâm
                 corners = [

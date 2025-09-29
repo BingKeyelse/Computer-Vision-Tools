@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'gui.ui'
+# Form implementation generated from reading ui file 'd:\Desktop_with_Data_Pronics\Computer_Vision_Tool\src\pyqt5_ui\gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -827,13 +827,4 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "SAMPLE"))
         self.label_2.setText(_translate("MainWindow", "IMAGE PROCESSING"))
         self.groupBox_7.setTitle(_translate("MainWindow", "GroupBox"))
-from pyqt5_ui import resource_rc
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+import resource_rc_rc

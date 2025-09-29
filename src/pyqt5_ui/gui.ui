@@ -202,6 +202,9 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="styleSheet">
+             <string notr="true">QGroupBox { font-weight: bold; }</string>
+            </property>
             <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
@@ -224,6 +227,89 @@
              <property name="bottomMargin">
               <number>0</number>
              </property>
+             <item>
+              <widget class="QGroupBox" name="groupBox_8">
+               <property name="title">
+                <string>CAMERA</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_6">
+                <property name="leftMargin">
+                 <number>9</number>
+                </property>
+                <property name="topMargin">
+                 <number>9</number>
+                </property>
+                <property name="rightMargin">
+                 <number>9</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>9</number>
+                </property>
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <item row="1" column="0" colspan="2">
+                 <widget class="QLabel" name="label_camera">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>19</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>8</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>IMAGE:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_3">
+                  <property name="text">
+                   <string>RESIZE: %</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="btn_resize">
+                  <item>
+                   <property name="text">
+                    <string>100</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>80</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>75</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>65</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>50</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>40</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
              <item>
               <widget class="QGroupBox" name="groupBox_2">
                <property name="palette">
@@ -670,8 +756,8 @@
                </property>
                <property name="font">
                 <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                  <underline>false</underline>
                  <strikeout>false</strikeout>
                  <stylestrategy>PreferDefault</stylestrategy>
@@ -689,7 +775,7 @@
 </string>
                </property>
                <property name="title">
-                <string>Tool Shape</string>
+                <string>TOOL SHAPE</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -815,7 +901,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="1">
+                <item row="5" column="0">
                  <widget class="QPushButton" name="btn_polyundo">
                   <property name="minimumSize">
                    <size>
@@ -834,6 +920,25 @@
                   </property>
                  </widget>
                 </item>
+                <item row="3" column="1">
+                 <widget class="QPushButton" name="btn_new">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>NEW</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
              </item>
@@ -841,20 +946,41 @@
               <widget class="QGroupBox" name="groupBox_3">
                <property name="font">
                 <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                 </font>
                </property>
                <property name="autoFillBackground">
                 <bool>false</bool>
                </property>
                <property name="title">
-                <string>Adjus Camera</string>
+                <string>ADJUST CAMERA</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
                </property>
                <layout class="QGridLayout" name="gridLayout_2">
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="btn_realtime">
+                  <property name="text">
+                   <string>REAL-TIME</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="btn_calib">
+                  <property name="text">
+                   <string>CALIB</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QPushButton" name="btn_apply">
+                  <property name="text">
+                   <string>APPLY</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="1" column="0">
                  <widget class="QPushButton" name="btn_trigsoft">
                   <property name="text">
@@ -866,20 +992,6 @@
                  <widget class="QPushButton" name="btn_light">
                   <property name="text">
                    <string>LIGHT</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QPushButton" name="btn_apply">
-                  <property name="text">
-                   <string>APPLY</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QPushButton" name="btn_realtime">
-                  <property name="text">
-                   <string>REAL-TIME</string>
                   </property>
                  </widget>
                 </item>
@@ -912,20 +1024,13 @@
                   </item>
                  </widget>
                 </item>
-                <item row="0" column="1">
-                 <widget class="QPushButton" name="btn_calib">
-                  <property name="text">
-                   <string>CALIB</string>
-                  </property>
-                 </widget>
-                </item>
                </layout>
               </widget>
              </item>
              <item>
               <widget class="QGroupBox" name="groupBox_4">
                <property name="title">
-                <string>Image Processing</string>
+                <string>IMAGE PROCESSING</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -965,7 +1070,7 @@
              <item>
               <widget class="QGroupBox" name="groupBox_5">
                <property name="title">
-                <string>List Image</string>
+                <string>LIST IMAGE</string>
                </property>
                <property name="flat">
                 <bool>true</bool>

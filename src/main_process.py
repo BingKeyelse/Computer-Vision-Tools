@@ -32,7 +32,7 @@ class Canvas(QLabel):
             # Do lệnh Qt.KeepAspectRatio
             self.x_offset = (self.width() - self.image_scaled.width()) // 2
             self.y_offset = (self.height() - self.image_scaled.height()) // 2
-            print(f'Giá trị offset {self.x_offset}  {self.y_offset}')
+            # print(f'Giá trị offset {self.x_offset}  {self.y_offset}')
 
             # Tính tỉ lệ so với ảnh gốc 
             self.ratio_base_image = (self.image_scaled.width() / self.orig_image.width(), self.image_scaled.height() / self.orig_image.height())
@@ -176,12 +176,18 @@ class MainWindow(QMainWindow):
         # Chọn tool mặc định là Box
         self.tool_manager.set_tool(BoxTool())
 
-        self.ui.btn_shape.currentTextChanged.connect(self.change_tool)
+        # Viết chức năng cho từng nút nhấn riêng
+        self.button_controller = ButtonController(self.ui, self.tool_manager, self.canvas)
 
-        self.ui.btn_cut.clicked.connect(lambda: (self.tool_manager.cut(), self.canvas.update()))
-        self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.clear(), self.canvas.update()))
-        self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.undo(), self.canvas.update()))
-        self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
+        # Tạo custom với ListWidget của ListImage và tạo singal với slot (hàm) muốn custom
+        self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom
+        self.ui.list_image.customContextMenuRequested.connect(        # Tạo signal kết nối với slot chỉ định 
+        lambda pos: self.button_controller.show_list_menu(pos)      # auto có pos để truyền vô slot đó
+        )
+
+        
+
+        
     
     def init_UX_UI(self)-> None:
         """
@@ -190,21 +196,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_polyundo.hide()
 
     
-    def change_tool(self, tool_name)-> None:
-        """
-        Hàm lựa chọn để thay đổi các shape tool cho ToolManager
-        """
-        
-        self.ui.btn_polyundo.hide()
-        if tool_name == "Box":
-            self.tool_manager.set_tool(BoxTool())
-        elif tool_name == "Circle":
-            self.tool_manager.set_tool(CircleTool())
-        elif tool_name == "Polygon":
-            self.tool_manager.set_tool(PolygonTool())
-            self.ui.btn_polyundo.show()
-        elif tool_name == "Oriented Box":
-            self.tool_manager.set_tool(OrientedBoxTool())
+    
        
 
 if __name__ == "__main__":

@@ -16,6 +16,14 @@ class OrientedBoxTool(MouseTool):
         self.start_mouse = None
         self.resize_normal = None
 
+        self.start_img= None
+        self.end_img= None
+
+    def reset_image(self)-> None:
+        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
+        self.start = None
+        self.end = None
+
     def get_center(self)-> tuple[int, int]:
         """Trả về tâm của hình chữ nhật hiện hiện tại dù nó có xoay hay không"""
         x1, y1 = self.start
@@ -150,7 +158,7 @@ class OrientedBoxTool(MouseTool):
             self.start = (x, y)
             self.end = self.start
 
-    def on_mouse_move(self, event) -> None:
+    def on_mouse_move(self, event, x_offset, y_offset) -> None:
         """Xử lý sự kiện di chuột."""
         if not self.start or not self.end:
             return
@@ -208,9 +216,29 @@ class OrientedBoxTool(MouseTool):
         self.base_hh = None
         self.resize_normal = None
 
-    def draw(self, painter)-> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
         if self.start and self.end:
             corners = self.get_corners()
+
+            # Tính toán để trả về cho thằng get shape
+            x1, y1 = self.start
+            x2, y2 = self.end
+
+            # print(f'Giá trị offset trên này==== {x_offset} {y_offset}')
+
+            # Trừ offset để ra tọa độ trên ảnh scaled
+            self.start_img_scaled = (x1 - x_offset, y1 - y_offset)
+            self.end_img_scaled   = (x2 - x_offset, y2 - y_offset)
+
+            # Tọa độ trên ảnh thực tế
+            # Đây là bước tính toán để truyền thẳng cho self.get_shape vì tính global của biến
+            self.start_img = (self.start_img_scaled[0] / ratio_base_image[0],
+                  self.start_img_scaled[1] / ratio_base_image[1])
+            self.end_img = (self.end_img_scaled[0] / ratio_base_image[0],
+                self.end_img_scaled[1] / ratio_base_image[1])
+            
+            ##############
+
             # vẽ polygon vì 4 điểm hiện tại không khác gì polygon
             pen = QPen(Qt.red, 2)
             painter.setPen(pen)
@@ -243,6 +271,6 @@ class OrientedBoxTool(MouseTool):
 
 
     def get_shape(self)-> None:
-        if self.start and self.end:
-            return ("oriented_box", self.start, self.end, self.angle)
+        if self.start_img and self.end_img:
+            return ("oriented_box", self.start_img, self.end_img, self.angle)
         return None

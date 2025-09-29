@@ -19,8 +19,13 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
         self.start_img= None
         self.end_img= None
 
+    def reset_image(self)-> None:
+        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
+        self.start = None
+        self.end = None
 
-    def on_mouse_down(self, event, x_offset=0, y_offset=0)-> None:
+
+    def on_mouse_down(self, event)-> None:
         """
         Thời điểm khi ấn xuống là xem có gần tâm của hình, hay cạnh nào không
         Nếu không khai báo giá trị toạ độ cho cả start và end mới
@@ -60,7 +65,7 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             self.end = self.start
 
 
-    def on_mouse_move(self, event, x_offset=0, y_offset=0, scaled=0.0)-> None:
+    def on_mouse_move(self, event, x_offset, y_offset)-> None:
         """
         Khi chuột di chuyển thì cập nhập lại với từ mode đang ở hiện tại
         Nếu không ở mode nào thì cập nhập lại end
@@ -119,12 +124,11 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
         Hình chữ nhật được vẽ bởi painter lấy từ ToolManager truyền cho
         
         """
-        ox, oy = x_offset, y_offset  # offset khi căn giữa ảnh
         if self.start and self.end:
             x1, y1 = self.start
             x2, y2 = self.end
 
-            print(f'Giá trị offset trên này==== {x_offset} {y_offset}')
+            # print(f'Giá trị offset trên này==== {x_offset} {y_offset}')
 
             # Trừ offset để ra tọa độ trên ảnh scaled
             self.start_img_scaled = (x1 - x_offset, y1 - y_offset)
@@ -162,7 +166,7 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
     
     def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int]]:
         """
-        Lấy tên của shape và giá trị start, end để lưu mẫu
+        Lấy tên của shape và giá trị start, end tuyệt đối trên ảnh kích thước thực tế để lưu
         
         """
         if self.start_img and self.end_img:
