@@ -9,6 +9,10 @@ class ButtonController:
         self.tool_manager= tool_manager
         self.canvas= canvas
 
+        # Function Camera
+        self.image=None
+        self.ui.btn_resize.currentTextChanged.connect(self.resize_iamge) 
+
         # Function ToolBar
         self.link_picutures= []
         self.ui.btn_open.clicked.connect(self.get_link_image)
@@ -16,14 +20,45 @@ class ButtonController:
         # self.ui.list_image.customContextMenuRequested.connect(self.show_list_menu)# Khi bạn bấm chuột phải vào thì phát singal tới slot được định, và auto truyền pos
         
         # Function Tool Shape
-        self.ui.btn_shape.currentTextChanged.connect(self.change_tool)
+        self.ui.btn_shape.currentTextChanged.connect(self.change_tool) #Singal tự gửi được Toolname của QListWidget
         self.ui.btn_cut.clicked.connect(lambda: (self.tool_manager.cut(), self.canvas.update()))
         self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.clear(), self.canvas.update()))
         self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.undo(), self.canvas.update()))
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
         self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
 
+    def  resize_iamge(self, size_text)-> None:
+        """ Dùng để lựa chọn để tùy chỉnh kích thước của ảnh để cho nó phù hợp với chương trình chạy"""
+
+        # Reset toàn bộ data trước khi vẽ lên mới nhé
+        self.tool_manager.clear()
+        self.tool_manager.reset()
+
+        scale= int(size_text)/100
+
+        if self.image is None:
+            return None
+    
+        h, w = self.image.shape[:2]
+        new_w = int(w * scale)
+        new_h = int(h * scale)
+
+        if new_w <= 0 or new_h <= 0:
+            return None  # Tránh resize về 0
+
+        # Resize ảnh bằng OpenCV
+        resized = cv2.resize(self.image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+        # Lưu lại ảnh đã resize (nếu bạn muốn giữ)
+        self.image_resized = resized  
+        self.get_information_image(self.image_resized)
+
+        # Nếu bạn đang có canvas để hiển thị thì update luôn
+        if hasattr(self, "canvas"):
+            self.canvas.set_image(resized)
         
+
+
     def change_tool(self, tool_name)-> None:
         """
         Hàm lựa chọn để thay đổi các shape tool cho ToolManager
@@ -70,9 +105,9 @@ class ButtonController:
         menu = QMenu(widget)
 
         # Thêm action chọn ảnh xử lý
-        delete_action = QAction("Choose", widget)
-        delete_action.triggered.connect(self.choose_selected_item)
-        menu.addAction(delete_action)
+        choose_action = QAction("Choose", widget)
+        choose_action.triggered.connect(self.choose_selected_item)
+        menu.addAction(choose_action)
 
         # Thêm action Xóa
         delete_action = QAction("Delete", widget)
@@ -100,4 +135,34 @@ class ButtonController:
             self.ui.list_image.takeItem(row)
     
     def choose_selected_item(self):
-        
+        """
+        Khi đường linh hay ảnh được chọn thì cho opencv đọc và đưa nó vào canvas
+        """
+        # Lấy thông tin ảnh xem nào
+
+        # Reset toàn bộ data trước khi vẽ lên mới nhé
+        self.tool_manager.clear()
+        self.tool_manager.reset()
+
+        item = self.ui.list_image.currentItem()  # lấy item đang được chọn
+        if item is None:
+            return  # không chọn gì thì thoát
+
+        file_path = item.text()  # đường dẫn ảnh
+        self.image = cv2.imread(file_path)
+        self.get_information_image(self.image)
+
+        if self.image is None:
+            print(f"Không thể đọc ảnh: {file_path}")
+            return
+
+        # Gán ảnh mới vào canvas
+        self.canvas.set_image(self.image)  
+
+    def get_information_image(self, image):
+        h, w = image.shape[:2]
+        self.ui.label_camera.setText(f'IMAGE: {h}x{w}')
+    
+
+
+

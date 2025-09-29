@@ -7,13 +7,32 @@ class Canvas(QLabel):
         vừa là vùng vẽ + xử lý sự kiện chuột cho các Tool.
         """
         super().__init__(parent)
+
+        self.original_image= None
+
         self.orig_image  = self.cvimg_to_qpixmap(img)
         # self.setPixmap(self.orig_image)
         # self.setScaledContents(True)  # tự động fit nội dung theo khung label
         self.tool_manager = None
         self.scale_paramater=(0,0)
-    
-    def resizeEvent(self, event):
+
+    def set_image(self, image) -> None:
+        """Cập nhật ảnh mới vào canvas"""
+        if image is None:
+            return
+        print("ToolManager nhận image:", type(image), getattr(image, "shape", None))
+        self.original_image= image
+
+        # Convert sang QPixmap
+        self.orig_image = self.cvimg_to_qpixmap(image)
+
+        # ép Qt gọi lại resizeEvent để tính toán lại scaled_image và offset
+        self.resizeEvent(None)
+
+        # gọi update để vẽ lại
+        self.update()
+        
+    def resizeEvent(self, event)-> None:
         """
         Hàm event handler có sẵn của Qt
         Khi widget đổi kích thước (ví dụ bạn kéo giãn cửa sổ), Qt tự động gọi hàm này.
@@ -36,6 +55,10 @@ class Canvas(QLabel):
 
             # Tính tỉ lệ so với ảnh gốc 
             self.ratio_base_image = (self.image_scaled.width() / self.orig_image.width(), self.image_scaled.height() / self.orig_image.height())
+
+            # print("Orig size:", self.orig_image.width(), self.orig_image.height())
+            # print("Scaled size:", self.image_scaled.width(), self.image_scaled.height())
+            # print("Ratio base:", self.ratio_base_image)
 
             # Sau khi có tỉ lệ này muốn suy ra tọa độ điểm ảnh trên ảnh gốc. Theo cthuc bên dưới
             # x_img = (event.x() - x_offset) / ratio
@@ -86,7 +109,7 @@ class Canvas(QLabel):
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:
-                self.tool_manager.handle_event("mouse_down", event, self.x_offset, self.y_offset)
+                self.tool_manager.handle_event("mouse_down", event, self.x_offset, self.y_offset, self.original_image)
             self.update()
 
     def mouseMoveEvent(self, event)-> None:
@@ -95,7 +118,7 @@ class Canvas(QLabel):
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:        
-                self.tool_manager.handle_event("mouse_move", event, self.x_offset, self.y_offset, self.scale_paramater)
+                self.tool_manager.handle_event("mouse_move", event, self.x_offset, self.y_offset, self.original_image)
             self.update()
 
     def mouseReleaseEvent(self, event)-> None:
@@ -104,7 +127,7 @@ class Canvas(QLabel):
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:
-                self.tool_manager.handle_event("mouse_up", event, self.x_offset, self.y_offset)
+                self.tool_manager.handle_event("mouse_up", event, self.x_offset, self.y_offset, self.original_image)
             self.update()
 
     def paintEvent(self, event)-> None:
@@ -121,6 +144,9 @@ class Canvas(QLabel):
         """ 
         super().paintEvent(event)
         # print('Có thay đổi theo')
+        if not self.orig_image:
+            return None
+        
         if self.image_scaled:
             painter = QPainter(self)
 
@@ -141,10 +167,10 @@ class MainWindow(QMainWindow):
 
         self.init_UX_UI()
 
-        image_ori= cv2.imread(r'src\data\images\image.jpg')
+        # image_ori= cv2.imread(r'src\data\images\image.jpg')
 
         # Tạo canvas và gắn vào QLabel có sẵn trong ui. Chúng nằm đè lên chứ không phải là một
-        self.canvas = Canvas(image_ori, parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
+        self.canvas = Canvas(None, parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
 
         # How to debug with widget to set fix with label
         # geometry() Thì lấy theo tọa độ của cha
@@ -184,20 +210,16 @@ class MainWindow(QMainWindow):
         self.ui.list_image.customContextMenuRequested.connect(        # Tạo signal kết nối với slot chỉ định 
         lambda pos: self.button_controller.show_list_menu(pos)      # auto có pos để truyền vô slot đó
         )
+        self.ui.list_image.itemDoubleClicked.connect( # Double-Click thì chọn luôn nhé
+            lambda: self.button_controller.choose_selected_item()
+        )
 
-        
-
-        
     
     def init_UX_UI(self)-> None:
         """
         Dùng để setup toàn bộ khởi tạo liên quan tới UX-UI
         """
         self.ui.btn_polyundo.hide()
-
-    
-    
-       
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

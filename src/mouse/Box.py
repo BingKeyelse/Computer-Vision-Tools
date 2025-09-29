@@ -136,11 +136,16 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
 
             # Tọa độ trên ảnh thực tế
             # Đây là bước tính toán để truyền thẳng cho self.get_shape vì tính global của biến
-            self.start_img = (self.start_img_scaled[0] / ratio_base_image[0],
-                  self.start_img_scaled[1] / ratio_base_image[1])
-            self.end_img = (self.end_img_scaled[0] / ratio_base_image[0],
-                self.end_img_scaled[1] / ratio_base_image[1])
+            self.start_img = (self.start_img_scaled[0] / (ratio_base_image[0]),
+                  self.start_img_scaled[1] / (ratio_base_image[1]))
+            self.end_img = (self.end_img_scaled[0] / (ratio_base_image[0]),
+                self.end_img_scaled[1] / (ratio_base_image[1]))
 
+            # self.start_img = (self.start_img_scaled[0] / (ratio_base_image[0]*scale_resize),
+            #       self.start_img_scaled[1] / (ratio_base_image[1]*scale_resize))
+            # self.end_img = (self.end_img_scaled[0] / (ratio_base_image[0]*scale_resize),
+            #     self.end_img_scaled[1] / (ratio_base_image[1]*scale_resize))
+            
             # Chuẩn hóa tọa độ (tránh trường hợp kéo ngược chuột)
             left, top = min(x1, x2), min(y1, y2)
             width, height = abs(x2 - x1), abs(y2 - y1)
