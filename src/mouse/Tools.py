@@ -11,17 +11,22 @@ class ToolManager:
         self.shapes = []  # chứa các hình đã cắt (chấp nhận)
         self.counter = 0   # để đánh số id
         self.image= None
+        self.link_image=None
+
+        self.scale_resize=1.0
 
     def set_tool(self, tool: MouseTool): # type hint ( gợi ý kiểu)
         """Chọn tool hiện tại để biết sẽ vẽ shape gì Box, Circle, Oriented Box, Polygon."""
 
         self.active_tool = tool
 
-    def handle_event(self, event_type, event, x_offset=0, y_offset=0, image=None)-> None:
+    def handle_event(self, event_type, event, x_offset=0, y_offset=0, image_original=None, link_image= None)-> None:
         """Gửi event cho tool đang active. như nhấn, nhả, di chuyển với chuột đang được chọn"""
 
-        self.image = image
-        print("ToolManager nhận image:", type(image), getattr(image, "shape", None))
+        self.image = image_original
+        self.link_image= link_image
+
+        print("ToolManager nhận image:", type(image_original), getattr(image_original, "shape", None))
 
         if not self.active_tool:
             return
@@ -74,11 +79,14 @@ class ToolManager:
         if isinstance(self.active_tool, PolygonTool):
             self.active_tool.undo_point()
 
-    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0)-> None:
         """Vẽ các hình đã chấp nhận + hình đang thao tác.
         Chuyển đổi vị trí tuyệt đối với ảnh thực tế kích thước thật
         sang vị trí tuyệt đối so với ảnh scaled rồi tiếp tới mới là Widget
         """
+
+        # Lấy tỉ lệ resize
+        self.scale_resize= scale
 
         # Xem qua các shape mà mình đã chấp nhận 
         for shape in self.shapes:
@@ -86,20 +94,24 @@ class ToolManager:
             if shape[0] == "box":
                 _, start, end, idx = shape
                 painter.setPen(QPen(Qt.blue, 2))
+                print(start)
 
                 # Không thay đổi
                 # x1, y1 = start
                 # x2, y2 = end
                 # Lấy tọa độ
 
-                # Nhận được tọa độ ảnh thực giờ biến sang ảnh scaled
-                x1_scaled, y1_scaled = int(start[0] *ratio_base_image[0]), int(start[1] *ratio_base_image[1])
-                x2_scaled, y2_scaled = int(end[0] *ratio_base_image[0]), int(end[1] *ratio_base_image[1])
+                # Nhận được tọa độ ảnh 100% sang ảnh resize
+                x1_resized, y1_resized = int(start[0] *self.scale_resize), int(start[1] *self.scale_resize)
+                x2_resized, y2_resized = int(end[0] *self.scale_resize), int(end[1] *self.scale_resize)
+
+
+                # Nhận được tọa độ ảnh thực resized giờ biến sang ảnh scaled
+                x1_scaled, y1_scaled = int(x1_resized *ratio_base_image[0]), int(y1_resized *ratio_base_image[1])
+                x2_scaled, y2_scaled = int(x2_resized *ratio_base_image[0]), int(y2_resized *ratio_base_image[1])
                 
-                # x1_scaled, y1_scaled = int(start[0] *ratio_base_image[0]*scale_resize), int(start[1] *ratio_base_image[1]*scale_resize)
-                # x2_scaled, y2_scaled = int(end[0] *ratio_base_image[0]*scale_resize), int(end[1] *ratio_base_image[1]*scale_resize)
-                # print(f"Giá trị nhận được là start({start}) và end({end})")
-                # print(f"Giá trị nhận được sau scaled là start({x1_scaled}) và end({y1_scaled})")
+                print(f"Giá trị nhận được là start({start}) và end({end})")
+                print(f"Giá trị nhận được sau scaled với tọa độ start({x1_resized},{y1_resized})")
 
                 # Thay đổi sang tọa độ tương đối so với Widget
                 x1, y1 = x1_scaled + x_offset, y1_scaled + y_offset
@@ -122,9 +134,13 @@ class ToolManager:
                 # x1, y1 = start
                 # x2, y2 = end
 
+                # Nhận được tọa độ ảnh 100% sang ảnh resize
+                x1_resized, y1_resized = int(start[0] *self.scale_resize), int(start[1] *self.scale_resize)
+                x2_resized, y2_resized = int(end[0] *self.scale_resize), int(end[1] *self.scale_resize)
+
                 # Nhận được tọa độ ảnh thực giờ biến sang ảnh scaled
-                x1_scaled, y1_scaled = int(start[0] *ratio_base_image[0]), int(start[1] *ratio_base_image[1])
-                x2_scaled, y2_scaled = int(end[0] *ratio_base_image[0]), int(end[1] *ratio_base_image[1])
+                x1_scaled, y1_scaled = int(x1_resized *ratio_base_image[0]), int(y1_resized *ratio_base_image[1])
+                x2_scaled, y2_scaled = int(x2_resized *ratio_base_image[0]), int(y2_resized *ratio_base_image[1])
 
                 # Thay đổi sang tọa độ tương đối so với Widget
                 x1, y1 = x1_scaled + x_offset, y1_scaled + y_offset
@@ -149,12 +165,16 @@ class ToolManager:
                 painter.setPen(QPen(Qt.blue, 2))
 
                 qpoints = []
-                for (x_img, y_img) in points:
-                    # 1. Ảnh gốc → scaled
-                    x_scaled = int(x_img * ratio_base_image[0])
-                    y_scaled = int(y_img * ratio_base_image[1])
+                for (x_img_100, y_img_100) in points:
+                    # 2. Ảnh size 100 → ảnh gốc
+                    x_resized = int(x_img_100 * scale)
+                    y_resized = int(y_img_100 * scale)
 
-                    # 2. Scaled → widget
+                    # 2. Ảnh gốc → scaled
+                    x_scaled = int(x_resized * ratio_base_image[0])
+                    y_scaled = int(y_resized * ratio_base_image[1])
+
+                    # 3. Scaled → widget
                     x = x_scaled + x_offset
                     y = y_scaled + y_offset
 
@@ -224,44 +244,96 @@ class ToolManager:
 
         # vẽ hình đang thao tác (chưa cut)
         if self.active_tool:
-            self.active_tool.draw(painter, x_offset, y_offset, ratio_base_image)
+            self.active_tool.draw(painter, x_offset, y_offset, ratio_base_image, self.scale_resize)
     
     def crop_shape(self, shape):
+        """
+        Toàn bộ kích thước và ảnh đều lấy ở định dạng 100% nhé 
+        """
         shape_type = shape[0]
-        print(shape)
 
+        image_100= cv2.imread(self.link_image)
+    
         if shape_type == "box":
             _, start, end = shape
             x1, y1 = map(int, start)
             x2, y2 = map(int, end)
             left, right = sorted([x1, x2])
             top, bottom = sorted([y1, y2])
-            # print(self.image.shape)
+            # print(image_100.shape)
 
-            cropped = self.image[top:bottom, left:right]
+            cropped = image_100[top:bottom, left:right]
             if cropped.size > 0:
                 self.save_cropped_image(cropped)
 
         elif shape_type == "circle":
-            _, start, end, idx = shape
+            _, start, end = shape
             x1, y1 = map(int, start)
             x2, y2 = map(int, end)
-            r = int(((x2 - x1)**2 + (y2 - y1)**2)**0.5)
 
-            mask = np.zeros(self.image.shape[:2], dtype=np.uint8)
-            cv2.circle(mask, (x1, y1), r, 255, -1)
-            cropped = cv2.bitwise_and(self.image, self.image, mask=mask)
+            # bán kính
+            r = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
+            margin = 5
+            extra = 2  # thêm 2px để không sát
+            R = r + margin + extra
 
-            cv2.imwrite(f"./output/circle_{idx}.jpg", cropped)
+            # tọa độ vùng crop vuông
+            x1_crop, y1_crop = max(0, x1 - R), max(0, y1 - R)
+            x2_crop, y2_crop = min(image_100.shape[1], x1 + R), min(image_100.shape[0], y1 + R)
+
+            # crop vùng vuông
+            cropped = image_100[y1_crop:y2_crop, x1_crop:x2_crop].copy()
+            h, w = cropped.shape[:2]
+
+            # tạo mask hình tròn (center = giữa crop)
+            mask = np.zeros((h, w), dtype=np.uint8)
+            cv2.circle(mask, (w // 2, h // 2), r, 255, -1)
+
+            # giữ phần hình tròn, ngoài vùng là đen
+            cropped_masked = cv2.bitwise_and(cropped, cropped, mask=mask)
+
+            if cropped_masked.size > 0:
+                self.save_cropped_image(cropped_masked)
+
         elif shape_type=="polygon":
-            _, points, idx = shape
-            mask = np.zeros(self.image.shape[:2], dtype=np.uint8)
-            cv2.fillPoly(mask, [np.array(points, dtype=np.int32)], 255)
-            cropped = cv2.bitwise_and(self.image, self.image, mask=mask)
+            _, points = shape
+            points = np.array(points, dtype=np.int32)
 
-            cv2.imwrite(f"./output/polygon_{idx}.jpg", cropped)
+            # bounding box
+            x, y, w, h = cv2.boundingRect(points)
+
+            # thêm margin
+            margin = 10
+            x1 = max(x - margin, 0)
+            y1 = max(y - margin, 0)
+            x2 = min(x + w + margin, image_100.shape[1])
+            y2 = min(y + h + margin, image_100.shape[0])
+
+            # crop ảnh gốc
+            cropped = image_100[y1:y2, x1:x2].copy()
+
+            # tạo mask cùng kích thước crop
+            mask = np.zeros((y2 - y1, x2 - x1), dtype=np.uint8)
+
+            # dịch polygon về hệ tọa độ crop
+            points_shifted = points - [x1, y1]
+            points_shifted = points_shifted.astype(np.int32)
+            points_shifted = points_shifted.reshape((-1, 1, 2))   # rất quan trọng
+            cv2.fillPoly(mask, [points_shifted], 255)
+
+            # áp mask: giữ nguyên trong polygon, ngoài = đen
+            cropped_masked = cv2.bitwise_and(cropped, cropped, mask=mask)
+
+            # cv2.imwrite("debug_cropped.png", cropped)
+            # cv2.imwrite("debug_mask.png", mask)
+            # cv2.imwrite("debug_result.png", cropped_masked)
+
+            if cropped_masked.size > 0:
+                self.save_cropped_image(cropped_masked)
+
+
         elif shape_type=="oriented_box":
-            _, start, end, angle, idx = shape
+            _, start, end, angle = shape
 
             # Lấy tâm, w, h
             cx, cy = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
@@ -271,12 +343,24 @@ class ToolManager:
             rect = ((cx, cy), (w, h), np.degrees(angle))
             box = cv2.boxPoints(rect).astype(np.int32)
 
-            # Crop theo rotated rect
-            mask = np.zeros(self.image.shape[:2], dtype=np.uint8)
-            cv2.fillPoly(mask, [box], 255)
-            cropped = cv2.bitwise_and(self.image, self.image, mask=mask)
+            # Tính bounding box quanh rotated rect
+            x, y, w_box, h_box = cv2.boundingRect(box)
 
-            cv2.imwrite(f"./output/oriented_box_{idx}.jpg", cropped)
+            # Crop ảnh gốc
+            cropped = image_100[y:y+h_box, x:x+w_box].copy()
+
+            # Tạo mask kích thước như crop
+            mask = np.zeros((h_box, w_box), dtype=np.uint8)
+
+            # Dịch box về toạ độ crop
+            box_shifted = box - [x, y]
+            cv2.fillPoly(mask, [box_shifted], 255)
+
+            # Áp mask → trong rotated rect giữ nguyên, ngoài = đen
+            cropped_masked = cv2.bitwise_and(cropped, cropped, mask=mask)
+
+            if cropped_masked.size > 0:
+                self.save_cropped_image(cropped_masked)
 
     
     def save_cropped_image(self, cropped):

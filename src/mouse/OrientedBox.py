@@ -19,6 +19,11 @@ class OrientedBoxTool(MouseTool):
         self.start_img= None
         self.end_img= None
 
+        self.start_img_100= None
+        self.end_img_100= None
+
+        self.scale_resize= 1.0
+
     def reset_image(self)-> None:
         """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.start = None
@@ -216,7 +221,11 @@ class OrientedBoxTool(MouseTool):
         self.base_hh = None
         self.resize_normal = None
 
-    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0)-> None:
+        
+        # Lấy scale resize kích thước ảnh
+        self.scale_resize= scale
+
         if self.start and self.end:
             corners = self.get_corners()
 
@@ -236,6 +245,12 @@ class OrientedBoxTool(MouseTool):
                   self.start_img_scaled[1] / ratio_base_image[1])
             self.end_img = (self.end_img_scaled[0] / ratio_base_image[0],
                 self.end_img_scaled[1] / ratio_base_image[1])
+            
+            # Tọa độ trên ảnh size 100%
+            self.start_img_100 = (self.start_img_scaled[0] / (ratio_base_image[0]*self.scale_resize),
+                  self.start_img_scaled[1] / (ratio_base_image[1]*self.scale_resize))
+            self.end_img_100 = (self.end_img_scaled[0] / (ratio_base_image[0]*self.scale_resize),
+                self.end_img_scaled[1] / (ratio_base_image[1]*self.scale_resize))
             
             ##############
 
@@ -271,6 +286,6 @@ class OrientedBoxTool(MouseTool):
 
 
     def get_shape(self)-> None:
-        if self.start_img and self.end_img:
-            return ("oriented_box", self.start_img, self.end_img, self.angle)
+        if self.start_img_100 and self.end_img_100:
+            return ("oriented_box", self.start_img_100, self.end_img_100, self.angle)
         return None

@@ -17,6 +17,11 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         self.start_img= None
         self.end_img= None
 
+        self.start_img_100= None
+        self.end_img_100= None
+
+        self.scale_resize= 1.0
+
     def reset_image(self)-> None:
         """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.start = None
@@ -83,8 +88,11 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
 
         self.mode = None
 
-    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0) -> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0) -> None:
         """Vẽ hình tròn hiện tại lên canvas, gồm viền, tâm và lớp phủ mờ."""
+
+        # Lấy scale resize kích thước ảnh
+        self.scale_resize= scale
 
         if self.start and self.end:
             x1, y1 = self.start
@@ -100,6 +108,12 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
                   self.start_img_scaled[1] / ratio_base_image[1])
             self.end_img = (self.end_img_scaled[0] / ratio_base_image[0],
                 self.end_img_scaled[1] / ratio_base_image[1])
+            
+            # Tọa độ trên ảnh size 100%
+            self.start_img_100 = (self.start_img_scaled[0] / (ratio_base_image[0]*self.scale_resize),
+                  self.start_img_scaled[1] / (ratio_base_image[1]*self.scale_resize))
+            self.end_img_100 = (self.end_img_scaled[0] / (ratio_base_image[0]*self.scale_resize),
+                self.end_img_scaled[1] / (ratio_base_image[1]*self.scale_resize))
 
             # Tính bán kính = khoảng cách từ start đến end
             r = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
@@ -130,6 +144,6 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
     def get_shape(self)-> None:
         """Trả về dữ liệu hình tròn (hoặc None nếu chưa có)."""
 
-        if self.start_img and self.end_img:
-            return ("circle", self.start_img, self.end_img)
+        if self.start_img_100 and self.end_img_100:
+            return ("circle", self.start_img_100, self.end_img_100)
         return None

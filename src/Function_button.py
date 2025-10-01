@@ -11,7 +11,8 @@ class ButtonController:
 
         # Function Camera
         self.image=None
-        self.ui.btn_resize.currentTextChanged.connect(self.resize_iamge) 
+        self.file_path=None
+        self.ui.btn_resize.currentTextChanged.connect(self.resize_image) 
 
         # Function ToolBar
         self.link_picutures= []
@@ -27,12 +28,20 @@ class ButtonController:
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
         self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
 
-    def  resize_iamge(self, size_text)-> None:
+        for i in range(1, 12):
+            btn = getattr(self.ui, f"btn_sample_{i}", None)
+            if btn:
+                btn.clicked.connect(lambda _, idx=i: self.handle_sample_click(idx))
+                
+    def handle_sample_click(self, idx):
+        print(f"Clicked index: {idx}")
+
+    def  resize_image(self, size_text)-> None:
         """ Dùng để lựa chọn để tùy chỉnh kích thước của ảnh để cho nó phù hợp với chương trình chạy"""
 
         # Reset toàn bộ data trước khi vẽ lên mới nhé
-        self.tool_manager.clear()
-        self.tool_manager.reset()
+        # self.tool_manager.clear()
+        # self.tool_manager.reset()
 
         scale= int(size_text)/100
 
@@ -55,10 +64,8 @@ class ButtonController:
 
         # Nếu bạn đang có canvas để hiển thị thì update luôn
         if hasattr(self, "canvas"):
-            self.canvas.set_image(resized)
+            self.canvas.set_image(resized, self.file_path, scale)
         
-
-
     def change_tool(self, tool_name)-> None:
         """
         Hàm lựa chọn để thay đổi các shape tool cho ToolManager
@@ -78,23 +85,27 @@ class ButtonController:
     def get_link_image(self):
         """Mở hộp thoại chọn file ảnh.
         Nếu chọn thì ảnh sẽ vào ListWidget  theo dạng insertItem
+        . Xong show ảnh luôn
         """
 
-        file_path, _ = QFileDialog.getOpenFileName(
+        self.file_path, _ = QFileDialog.getOpenFileName(
             None, # Nếu ở trong MainWindow thì truyền self
             "Chọn ảnh",                # tiêu đề hộp thoại
             "",                        # thư mục mặc định ("" = thư mục hiện tại)
             "Image Files (*.png *.jpg *.jpeg *.bmp)"  # filter chỉ cho phép chọn ảnh
         )
-        if file_path:  # Nếu user chọn ảnh (không bấm Cancel)
-            # print("Ảnh được chọn:", file_path)
-            self.link_picutures.append(file_path)
+        if self.file_path:  # Nếu user chọn ảnh (không bấm Cancel)
+            # print("Ảnh được chọn:", self.file_path)
+            self.link_picutures.append(self.file_path)
             # Hiển thị lên QListWidget
-            self.ui.list_image.insertItem(0,file_path)  # listWidget là QListWidget trong .ui của bạn
+            self.ui.list_image.insertItem(0,self.file_path)  # listWidget là QListWidget trong .ui của bạn
 
              # Nếu số lượng item > 10 thì xóa item cuối
             if self.ui.list_image.count() > 10:
                 self.ui.list_image.takeItem(self.ui.list_image.count() - 1)
+
+        # Show ảnh luôn        
+        self.choose_selected_item()
         return None
     
     def show_list_menu(self, pos):
@@ -138,26 +149,27 @@ class ButtonController:
         """
         Khi đường linh hay ảnh được chọn thì cho opencv đọc và đưa nó vào canvas
         """
-        # Lấy thông tin ảnh xem nào
-
+        self.ui.btn_resize.setCurrentIndex(0)
         # Reset toàn bộ data trước khi vẽ lên mới nhé
         self.tool_manager.clear()
         self.tool_manager.reset()
 
+        # Lấy thông tin ảnh xem nào 
         item = self.ui.list_image.currentItem()  # lấy item đang được chọn
         if item is None:
-            return  # không chọn gì thì thoát
+            item = self.ui.list_image.item(0)
+            
 
-        file_path = item.text()  # đường dẫn ảnh
-        self.image = cv2.imread(file_path)
+        self.file_path = item.text()  # đường dẫn ảnh
+        self.image = cv2.imread(self.file_path)
         self.get_information_image(self.image)
 
         if self.image is None:
-            print(f"Không thể đọc ảnh: {file_path}")
+            print(f"Không thể đọc ảnh: {self.file_path}")
             return
 
         # Gán ảnh mới vào canvas
-        self.canvas.set_image(self.image)  
+        self.canvas.set_image(self.image, self.file_path)  
 
     def get_information_image(self, image):
         h, w = image.shape[:2]

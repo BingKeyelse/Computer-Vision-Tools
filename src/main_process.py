@@ -9,19 +9,30 @@ class Canvas(QLabel):
         super().__init__(parent)
 
         self.original_image= None
+        self.link_image= None
 
         self.orig_image  = self.cvimg_to_qpixmap(img)
         # self.setPixmap(self.orig_image)
         # self.setScaledContents(True)  # tự động fit nội dung theo khung label
         self.tool_manager = None
-        self.scale_paramater=(0,0)
+        # self.scale_paramater=(0,0)
+        self.scale= 1
 
-    def set_image(self, image) -> None:
+    def set_image(self, image, link_image, scale=1) -> None:
         """Cập nhật ảnh mới vào canvas"""
         if image is None:
             return
         print("ToolManager nhận image:", type(image), getattr(image, "shape", None))
+        print(f"Giá trị scale nhận được là {scale}")
+
+        # Truyền ảnh gốc vào đây
         self.original_image= image
+
+        # Truyền ảnh ở trạng thái 
+        self.link_image= link_image
+
+        # Lấy giá trị scale được truyền
+        self.scale= scale
 
         # Convert sang QPixmap
         self.orig_image = self.cvimg_to_qpixmap(image)
@@ -53,7 +64,7 @@ class Canvas(QLabel):
             self.y_offset = (self.height() - self.image_scaled.height()) // 2
             # print(f'Giá trị offset {self.x_offset}  {self.y_offset}')
 
-            # Tính tỉ lệ so với ảnh gốc 
+            # Tính tỉ lệ so với ảnh gốc và frame ảnh hiện tại
             self.ratio_base_image = (self.image_scaled.width() / self.orig_image.width(), self.image_scaled.height() / self.orig_image.height())
 
             # print("Orig size:", self.orig_image.width(), self.orig_image.height())
@@ -109,7 +120,7 @@ class Canvas(QLabel):
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:
-                self.tool_manager.handle_event("mouse_down", event, self.x_offset, self.y_offset, self.original_image)
+                self.tool_manager.handle_event("mouse_down", event, self.x_offset, self.y_offset, self.original_image, self.link_image)
             self.update()
 
     def mouseMoveEvent(self, event)-> None:
@@ -118,7 +129,7 @@ class Canvas(QLabel):
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:        
-                self.tool_manager.handle_event("mouse_move", event, self.x_offset, self.y_offset, self.original_image)
+                self.tool_manager.handle_event("mouse_move", event, self.x_offset, self.y_offset, self.original_image, self.link_image)
             self.update()
 
     def mouseReleaseEvent(self, event)-> None:
@@ -127,7 +138,7 @@ class Canvas(QLabel):
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:
-                self.tool_manager.handle_event("mouse_up", event, self.x_offset, self.y_offset, self.original_image)
+                self.tool_manager.handle_event("mouse_up", event, self.x_offset, self.y_offset, self.original_image, self.link_image)
             self.update()
 
     def paintEvent(self, event)-> None:
@@ -156,7 +167,7 @@ class Canvas(QLabel):
         if self.tool_manager:
             # painter = QPainter(self) # QPainter chính là cây cọ trong Qt,
             # self.tool_manager.draw(painter) # Đưa cọ cho ToolManager để nó vứt cho thằng nào thì vứt để sài
-            self.tool_manager.draw(painter, self.x_offset, self.y_offset, self.ratio_base_image)
+            self.tool_manager.draw(painter, self.x_offset, self.y_offset, self.ratio_base_image, self.scale)
 
 
 class MainWindow(QMainWindow):
@@ -194,7 +205,6 @@ class MainWindow(QMainWindow):
         #     "AFTER SHOW:",
         #     self.canvas.scale_paramater
         # ))
-
         
         self.tool_manager = ToolManager() # Đạo diễn, người chỉ định dùng tool nào
         self.canvas.set_tool_manager(self.tool_manager)
@@ -213,13 +223,22 @@ class MainWindow(QMainWindow):
         self.ui.list_image.itemDoubleClicked.connect( # Double-Click thì chọn luôn nhé
             lambda: self.button_controller.choose_selected_item()
         )
-
     
     def init_UX_UI(self)-> None:
         """
         Dùng để setup toàn bộ khởi tạo liên quan tới UX-UI
         """
         self.ui.btn_polyundo.hide()
+
+        # Ẩn phần thành detail
+        # for i in range(1, 12):  # từ 1 -> 11
+        #     btn = getattr(self.ui, f"btn_sample_{i}", None)
+        #     lbl = getattr(self.ui, f"label_sample_{i}", None)
+
+        #     if btn:
+        #         btn.setVisible(False)   # hoặc btn.hide()
+        #     if lbl:
+        #         lbl.setVisible(False)   # hoặc lbl.hide()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

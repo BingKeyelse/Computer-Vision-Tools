@@ -10,6 +10,7 @@ class PolygonTool(MouseTool):
         self.points = []   # danh sách điểm [(x,y), (x,y), ...]
         self.is_finished = False  # cờ đánh dấu đã chốt polygon chưa
         self.points_image = [] 
+        self.points_image_100 = [] 
     
     def reset_image(self)-> None:
         """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
@@ -24,18 +25,16 @@ class PolygonTool(MouseTool):
             return
 
         x, y = event.x(), event.y()
-
+        if self.is_finished == False:
+            if self.points:
+                # Kiểm tra click gần điểm đầu tiên => khép polygon
+                x0, y0 = self.points[0]
         
-
-        if self.points:
-            # Kiểm tra click gần điểm đầu tiên => khép polygon
-            x0, y0 = self.points[0]
-
-        if len(self.points) >= 3 and abs(x - x0) < 10 and abs(y - y0) < 10:
-            self.is_finished = True
-            self.points.append((x0, y0))
-        else:
-            self.points.append((x, y))
+            if len(self.points) >= 3 and abs(x - x0) < 10 and abs(y - y0) < 10:
+                self.is_finished = True
+                # self.points.append((x0, y0))
+            else:
+                self.points.append((x, y))
         return
 
     def on_mouse_move(self, event, x_offset, y_offset) -> None:
@@ -55,11 +54,12 @@ class PolygonTool(MouseTool):
 
     def get_shape(self):
         """Trả polygon khi đã hoàn tất (is_finished=True)."""
-        if self.is_finished and len(self.points_image) >= 3:
-            return ("polygon", self.points_image)
+        if self.is_finished and len(self.points_image_100) >= 3:
+            self.is_finished=False
+            return ("polygon", self.points_image_100)
         return None
 
-    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0) -> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0) -> None:
         """Vẽ polygon đang thao tác."""
         if not self.points:
             return
@@ -72,6 +72,7 @@ class PolygonTool(MouseTool):
         if self.is_finished:
             # Tính toán lại để gửi về phần get shape
             self.points_image = [] 
+            self.points_image_100= []
             for (x, y) in self.points:
                 # Trừ offset để ra tọa độ trên ảnh scaled
                 x_scaled = x - x_offset
@@ -81,7 +82,13 @@ class PolygonTool(MouseTool):
                 x_img = x_scaled / ratio_base_image[0]
                 y_img = y_scaled / ratio_base_image[1]
 
+                # Đưa về tọa độ trên ảnh 100%
+                x_img_100= x_img/scale
+                y_img_100= y_img/scale
+
+
                 self.points_image.append((x_img, y_img))
+                self.points_image_100.append((x_img_100, y_img_100))
 
             polygon = QPolygon([QPoint(x, y) for x, y in self.points])
             painter.drawPolygon(polygon)

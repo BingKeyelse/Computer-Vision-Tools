@@ -18,7 +18,7 @@ class MouseTool:
     nhấn. di, nhả, vẽ hình, trả lại shape cho ToolManager
     """
     def on_mouse_down(self): pass
-    def on_mouse_move(self, x_offset=0, y_offset=0): pass
+    def on_mouse_move(self, x_offset=0, y_offset=0, scale=1.0): pass
     def on_mouse_up(self): pass
     def draw(self): pass
     def reset_image(self): pass

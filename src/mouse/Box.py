@@ -19,6 +19,11 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
         self.start_img= None
         self.end_img= None
 
+        self.start_img_100= None
+        self.end_img_100= None
+
+        self.scale_resize= 1.0
+
     def reset_image(self)-> None:
         """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.start = None
@@ -118,12 +123,16 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
         self.mode = None
         
 
-    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0)-> None:
+    def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0)-> None:
         """
         Vẽ hình chữ nhật với khung đỏ, tâm hình và nền mờ trong suốt.
         Hình chữ nhật được vẽ bởi painter lấy từ ToolManager truyền cho
         
         """
+        # Lấy scale resize kích thước ảnh
+        self.scale_resize= scale
+
+
         if self.start and self.end:
             x1, y1 = self.start
             x2, y2 = self.end
@@ -140,11 +149,12 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
                   self.start_img_scaled[1] / (ratio_base_image[1]))
             self.end_img = (self.end_img_scaled[0] / (ratio_base_image[0]),
                 self.end_img_scaled[1] / (ratio_base_image[1]))
-
-            # self.start_img = (self.start_img_scaled[0] / (ratio_base_image[0]*scale_resize),
-            #       self.start_img_scaled[1] / (ratio_base_image[1]*scale_resize))
-            # self.end_img = (self.end_img_scaled[0] / (ratio_base_image[0]*scale_resize),
-            #     self.end_img_scaled[1] / (ratio_base_image[1]*scale_resize))
+            
+            # Tọa độ trên ảnh size 100%
+            self.start_img_100 = (self.start_img_scaled[0] / (ratio_base_image[0]*self.scale_resize),
+                  self.start_img_scaled[1] / (ratio_base_image[1]*self.scale_resize))
+            self.end_img_100 = (self.end_img_scaled[0] / (ratio_base_image[0]*self.scale_resize),
+                self.end_img_scaled[1] / (ratio_base_image[1]*self.scale_resize))
             
             # Chuẩn hóa tọa độ (tránh trường hợp kéo ngược chuột)
             left, top = min(x1, x2), min(y1, y2)
@@ -172,10 +182,11 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
     def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int]]:
         """
         Lấy tên của shape và giá trị start, end tuyệt đối trên ảnh kích thước thực tế để lưu
+        và đặc biệt là với tọa độ ảnh 100%
         
         """
-        if self.start_img and self.end_img:
+        if self.start_img_100 and self.end_img_100:
             # Trả lại theo tọa độ tuyệt đối so với ảnh
-            return ("box", self.start_img, self.end_img)
+            return ("box", self.start_img_100, self.end_img_100)
         return None
     
