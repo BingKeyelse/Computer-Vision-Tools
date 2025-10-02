@@ -25,7 +25,7 @@ class MouseTool:
 
     ## Thêm
     def get_shape(self):
-        """Trả về dữ liệu hình đã vẽ xong (nếu có)"""
+        """Trả về dữ liệu hình đã vẽ xong (nếu có) gồm kiểu shape và thông số cần thiết"""
         return None
 
 from mouse.Box import BoxTool

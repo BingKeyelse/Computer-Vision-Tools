@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1117</width>
-    <height>731</height>
+    <width>1115</width>
+    <height>724</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -228,9 +228,42 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QGroupBox" name="groupBox_8">
+              <widget class="QGroupBox" name="groupBox_9">
                <property name="title">
                 <string>CAMERA</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_15">
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="btn_check_cam">
+                  <property name="text">
+                   <string>Check Cam</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QLabel" name="lb_size_cam">
+                  <property name="text">
+                   <string>Size</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QPushButton" name="btn_capture_cam">
+                  <property name="text">
+                   <string>Capture</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QComboBox" name="btn_choose_cam"/>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_8">
+               <property name="title">
+                <string>IMAGE</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_6">
                 <property name="leftMargin">
@@ -1400,15 +1433,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_1">
+                       <widget class="QPushButton" name="btn_stick_1">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1421,6 +1452,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_1">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1452,15 +1494,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_2">
+                       <widget class="QPushButton" name="btn_stick_2">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1473,6 +1513,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_2">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1504,15 +1555,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_3">
+                       <widget class="QPushButton" name="btn_stick_3">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1525,6 +1574,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_3">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1556,15 +1616,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_4">
+                       <widget class="QPushButton" name="btn_stick_4">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1577,6 +1635,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_4">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1608,15 +1677,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_5">
+                       <widget class="QPushButton" name="btn_stick_5">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1629,6 +1696,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_5">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1660,15 +1738,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_6">
+                       <widget class="QPushButton" name="btn_stick_6">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1681,6 +1757,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_6">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1712,15 +1799,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_7">
+                       <widget class="QPushButton" name="btn_stick_7">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1733,6 +1818,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_7">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1764,15 +1860,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_8">
+                       <widget class="QPushButton" name="btn_stick_8">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1785,6 +1879,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_8">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1816,15 +1921,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_9">
+                       <widget class="QPushButton" name="btn_stick_9">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1837,6 +1940,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_9">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1868,15 +1982,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_10">
+                       <widget class="QPushButton" name="btn_stick_10">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1889,6 +2001,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_10">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1920,15 +2043,13 @@
                        <number>0</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="label_sample_11">
+                       <widget class="QPushButton" name="btn_stick_11">
                         <property name="text">
                          <string/>
                         </property>
-                        <property name="pixmap">
-                         <pixmap resource="resource_rc.qrc">:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</pixmap>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</normaloff>:/icon/Icon/check_24dp_000000_FILL0_wght400_GRAD0_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1941,6 +2062,17 @@
                          <iconset resource="resource_rc.qrc">
                           <normaloff>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>
                           <normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normalon>:/icon/Icon/search_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btn_delete_11">
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="resource_rc.qrc">
+                          <normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</normaloff>:/icon/Icon/delete_24dp_000000_FILL0_wght400_GRAD200_opsz24.png</iconset>
                         </property>
                        </widget>
                       </item>
@@ -1983,7 +2115,7 @@
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,18">
+            <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,15">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -2024,15 +2156,96 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox_7">
+              <widget class="QStackedWidget" name="stackedWidget_7">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>
                 </font>
                </property>
-               <property name="title">
-                <string>GroupBox</string>
+               <property name="currentIndex">
+                <number>0</number>
                </property>
+               <widget class="QWidget" name="page_detail_sample" native="true">
+                <layout class="QGridLayout" name="gridLayout_16" rowstretch="10,18">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <item row="1" column="0">
+                  <spacer name="verticalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QWidget" name="widget_2" native="true">
+                   <layout class="QGridLayout" name="gridLayout_17">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_5">
+                      <property name="styleSheet">
+                       <string notr="true">background-color: rgb(85, 255, 0);</string>
+                      </property>
+                      <property name="text">
+                       <string>Màn 1</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="page">
+                <widget class="QLabel" name="label_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>70</x>
+                   <y>150</y>
+                   <width>111</width>
+                   <height>111</height>
+                  </rect>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(85, 255, 0);</string>
+                 </property>
+                 <property name="text">
+                  <string>Màn 2</string>
+                 </property>
+                </widget>
+               </widget>
               </widget>
              </item>
             </layout>

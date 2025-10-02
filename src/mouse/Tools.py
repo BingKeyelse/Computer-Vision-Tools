@@ -43,7 +43,7 @@ class ToolManager:
         """
         self.active_tool.reset_image()
     
-    def cut(self)-> None:
+    def cut(self, list_shape=None)-> None:
         """Nhận hình hiện tại và reset tool."""
 
         if self.active_tool:
@@ -51,13 +51,22 @@ class ToolManager:
             
             if shape:
                 # Gọi hàm xử lý crop chung
-                self.crop_shape(shape)
+                # self.crop_shape(shape)
+                if list_shape is not None:
+                    list_shape.append({
+                        'mode': 0,
+                        'link': self.link_image,
+                        'data': shape
+                    })
 
                 self.counter += 1
                 shape_with_id = shape + (self.counter,)
                 self.shapes.append(shape_with_id)
             # reset tool để chuẩn bị vẽ mới
             self.active_tool = type(self.active_tool)()
+
+        if list_shape is not None:
+            return list_shape
 
     def clear(self)-> None:
         """Xoá toàn bộ hình"""
@@ -70,6 +79,11 @@ class ToolManager:
 
         if self.shapes:
             self.shapes.pop()
+            self.counter -= 1
+    
+    def remove_SHAPE(self, idx=None):
+        if idx is not None:
+            self.shapes.pop(idx)
             self.counter -= 1
     
     def undo_polygon(self)-> None:
@@ -94,7 +108,7 @@ class ToolManager:
             if shape[0] == "box":
                 _, start, end, idx = shape
                 painter.setPen(QPen(Qt.blue, 2))
-                print(start)
+                # print(start)
 
                 # Không thay đổi
                 # x1, y1 = start
@@ -110,8 +124,8 @@ class ToolManager:
                 x1_scaled, y1_scaled = int(x1_resized *ratio_base_image[0]), int(y1_resized *ratio_base_image[1])
                 x2_scaled, y2_scaled = int(x2_resized *ratio_base_image[0]), int(y2_resized *ratio_base_image[1])
                 
-                print(f"Giá trị nhận được là start({start}) và end({end})")
-                print(f"Giá trị nhận được sau scaled với tọa độ start({x1_resized},{y1_resized})")
+                # print(f"Giá trị nhận được là start({start}) và end({end})")
+                # print(f"Giá trị nhận được sau scaled với tọa độ start({x1_resized},{y1_resized})")
 
                 # Thay đổi sang tọa độ tương đối so với Widget
                 x1, y1 = x1_scaled + x_offset, y1_scaled + y_offset
@@ -246,13 +260,16 @@ class ToolManager:
         if self.active_tool:
             self.active_tool.draw(painter, x_offset, y_offset, ratio_base_image, self.scale_resize)
     
-    def crop_shape(self, shape):
+    def crop_shape(self, link='', shape= None):
         """
         Toàn bộ kích thước và ảnh đều lấy ở định dạng 100% nhé 
         """
+        if link=='' and not shape:
+            return None
+        
         shape_type = shape[0]
 
-        image_100= cv2.imread(self.link_image)
+        image_100= cv2.imread(link)
     
         if shape_type == "box":
             _, start, end = shape
@@ -262,9 +279,9 @@ class ToolManager:
             top, bottom = sorted([y1, y2])
             # print(image_100.shape)
 
-            cropped = image_100[top:bottom, left:right]
-            if cropped.size > 0:
-                self.save_cropped_image(cropped)
+            cropped_masked = image_100[top:bottom, left:right]
+            # if cropped_masked.size > 0:
+            #     self.save_cropped_image(cropped)
 
         elif shape_type == "circle":
             _, start, end = shape
@@ -292,8 +309,8 @@ class ToolManager:
             # giữ phần hình tròn, ngoài vùng là đen
             cropped_masked = cv2.bitwise_and(cropped, cropped, mask=mask)
 
-            if cropped_masked.size > 0:
-                self.save_cropped_image(cropped_masked)
+            # if cropped_masked.size > 0:
+            #     self.save_cropped_image(cropped_masked)
 
         elif shape_type=="polygon":
             _, points = shape
@@ -328,8 +345,8 @@ class ToolManager:
             # cv2.imwrite("debug_mask.png", mask)
             # cv2.imwrite("debug_result.png", cropped_masked)
 
-            if cropped_masked.size > 0:
-                self.save_cropped_image(cropped_masked)
+            # if cropped_masked.size > 0:
+            #     self.save_cropped_image(cropped_masked)
 
 
         elif shape_type=="oriented_box":
@@ -359,8 +376,9 @@ class ToolManager:
             # Áp mask → trong rotated rect giữ nguyên, ngoài = đen
             cropped_masked = cv2.bitwise_and(cropped, cropped, mask=mask)
 
-            if cropped_masked.size > 0:
-                self.save_cropped_image(cropped_masked)
+            # if cropped_masked.size > 0:
+            #     self.save_cropped_image(cropped_masked)
+        return cropped_masked
 
     
     def save_cropped_image(self, cropped):

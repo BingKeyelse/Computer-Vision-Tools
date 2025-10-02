@@ -1,29 +1,36 @@
 from libs import*
 
 class Canvas(QLabel):
-    def __init__(self, img, parent=None):
+    def __init__(self, parent=None):
         """
-        Canvas kế thừa từ QLabel để vừa hiển thị ảnh, 
-        vừa là vùng vẽ + xử lý sự kiện chuột cho các Tool.
+        # Canvas kế thừa từ QLabel 
+        Để vừa hiển thị ảnh, vừa là vùng vẽ + xử lý sự kiện chuột cho các Tool.
+        - parent: đói tượng label chỉ định
         """
         super().__init__(parent)
 
         self.original_image= None
         self.link_image= None
 
-        self.orig_image  = self.cvimg_to_qpixmap(img)
-        # self.setPixmap(self.orig_image)
+        self.orig_image_Pixmap  = None
+        # self.setPixmap(self.orig_image_Pixmap)
         # self.setScaledContents(True)  # tự động fit nội dung theo khung label
+
         self.tool_manager = None
-        # self.scale_paramater=(0,0)
         self.scale= 1
 
     def set_image(self, image, link_image, scale=1) -> None:
-        """Cập nhật ảnh mới vào canvas"""
+        """ 
+        # Cập nhật ảnh mới vào Canvas
+        - input
+            - image: là ảnh resized được đưa vào
+            - link_image: link ảnh gốc dùng để đọc full size
+            - scale: tỉ lệ resize ảnh
+        """
         if image is None:
             return
-        print("ToolManager nhận image:", type(image), getattr(image, "shape", None))
-        print(f"Giá trị scale nhận được là {scale}")
+        # print("ToolManager nhận image:", type(image), getattr(image, "shape", None))
+        # print(f"Giá trị scale nhận được là {scale}")
 
         # Truyền ảnh gốc vào đây
         self.original_image= image
@@ -35,7 +42,7 @@ class Canvas(QLabel):
         self.scale= scale
 
         # Convert sang QPixmap
-        self.orig_image = self.cvimg_to_qpixmap(image)
+        self.orig_image_Pixmap = self.cvimg_to_qpixmap(image)
 
         # ép Qt gọi lại resizeEvent để tính toán lại scaled_image và offset
         self.resizeEvent(None)
@@ -45,13 +52,13 @@ class Canvas(QLabel):
         
     def resizeEvent(self, event)-> None:
         """
-        Hàm event handler có sẵn của Qt
+        - Hàm event handler có sẵn của Qt
         Khi widget đổi kích thước (ví dụ bạn kéo giãn cửa sổ), Qt tự động gọi hàm này.
         Ta override để cập nhật lại cách hiển thị ảnh.
         """
-        if self.orig_image:
+        if self.orig_image_Pixmap:
             # Scale ảnh theo kích thước của widget giờ ta có ảnh đã scale
-            self.image_scaled = self.orig_image.scaled(
+            self.image_scaled = self.orig_image_Pixmap.scaled(
                 self.width(), self.height(),
                 Qt.KeepAspectRatio, # giữ nguyên tỷ lệ khung hình (không méo ảnh).
                 Qt.SmoothTransformation # dùng thuật toán nội suy mượt (chậm hơn nhưng chất lượng tốt).
@@ -65,9 +72,9 @@ class Canvas(QLabel):
             # print(f'Giá trị offset {self.x_offset}  {self.y_offset}')
 
             # Tính tỉ lệ so với ảnh gốc và frame ảnh hiện tại
-            self.ratio_base_image = (self.image_scaled.width() / self.orig_image.width(), self.image_scaled.height() / self.orig_image.height())
+            self.ratio_base_image = (self.image_scaled.width() / self.orig_image_Pixmap.width(), self.image_scaled.height() / self.orig_image_Pixmap.height())
 
-            # print("Orig size:", self.orig_image.width(), self.orig_image.height())
+            # print("Orig size:", self.orig_image_Pixmap.width(), self.orig_image_Pixmap.height())
             # print("Scaled size:", self.image_scaled.width(), self.image_scaled.height())
             # print("Ratio base:", self.ratio_base_image)
 
@@ -81,8 +88,13 @@ class Canvas(QLabel):
 
     def cvimg_to_qpixmap(self, cv_img):
         """
-        Chuyển ảnh từ OpenCV (numpy array BGR) → QPixmap để hiển thị trong QLabel
+        # Chuyển ảnh từ OpenCV (numpy array BGR) → QPixmap để hiển thị trong QLabel
         Bởi vì Qlabel cần là đối tượng ở dạng QPixmap hoặc QImage
+        - input 
+            - cv_img: đối tượng ảnh muốn chuyển dạng
+
+        - output
+            - 
         """
         if cv_img is None:
             return None
@@ -99,14 +111,15 @@ class Canvas(QLabel):
     
     def in_image_area(self, x: int, y: int)-> bool:
         """
-        Để xem là trỏ chuột có ở trong khung hình hay không """
-        if not self.orig_image:
+        Để xem là trỏ chuột có ở trong khung hình hay không 
+        """
+        if not self.orig_image_Pixmap:
             return False
 
         return (self.x_offset <= x <= self.x_offset + self.image_scaled.width() and
                 self.y_offset <= y <= self.y_offset + self.image_scaled.height())
     
-    def set_tool_manager(self, manager)-> None:
+    def set_tool_manager(self, manager=None)-> None:
         """
         Gắn ToolManager cho canvas. 
         Nếu manager = None thì không làm gì cả.
@@ -115,7 +128,7 @@ class Canvas(QLabel):
 
     def mousePressEvent(self, event)->None:
         """
-        Sự kiện chuột nhấn --> ToolManager
+        Sự kiện chuột nhấn --> ToolManager. Nó sẽ tự động chạy khi tương tác với Canvas
         Nếu tool_manager = None thì return None (bỏ qua).
         """
         if self.in_image_area(event.x(), event.y()):
@@ -155,7 +168,7 @@ class Canvas(QLabel):
         """ 
         super().paintEvent(event)
         # print('Có thay đổi theo')
-        if not self.orig_image:
+        if not self.orig_image_Pixmap:
             return None
         
         if self.image_scaled:
@@ -181,7 +194,7 @@ class MainWindow(QMainWindow):
         # image_ori= cv2.imread(r'src\data\images\image.jpg')
 
         # Tạo canvas và gắn vào QLabel có sẵn trong ui. Chúng nằm đè lên chứ không phải là một
-        self.canvas = Canvas(None, parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
+        self.canvas = Canvas(parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
 
         # How to debug with widget to set fix with label
         # geometry() Thì lấy theo tọa độ của cha
@@ -212,8 +225,14 @@ class MainWindow(QMainWindow):
         # Chọn tool mặc định là Box
         self.tool_manager.set_tool(BoxTool())
 
+        # Setup canvas cho Sample
+        self.canvas_Sample = Canvas(parent=self.ui.label_5)
+        layout_Sample = QVBoxLayout(self.ui.label_5) 
+        layout_Sample.setContentsMargins(0,0,0,0) 
+        layout_Sample.addWidget(self.canvas_Sample) 
+
         # Viết chức năng cho từng nút nhấn riêng
-        self.button_controller = ButtonController(self.ui, self.tool_manager, self.canvas)
+        self.button_controller = ButtonController(self.ui, self.tool_manager, self.canvas, self.canvas_Sample)
 
         # Tạo custom với ListWidget của ListImage và tạo singal với slot (hàm) muốn custom
         self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom
@@ -228,17 +247,21 @@ class MainWindow(QMainWindow):
         """
         Dùng để setup toàn bộ khởi tạo liên quan tới UX-UI
         """
+        # Thành phần liên quan đến Tool Shape
         self.ui.btn_polyundo.hide()
 
-        # Ẩn phần thành detail
-        # for i in range(1, 12):  # từ 1 -> 11
-        #     btn = getattr(self.ui, f"btn_sample_{i}", None)
-        #     lbl = getattr(self.ui, f"label_sample_{i}", None)
+        # Thành phân liên quan đến phần Sample 
+        for i in range(1, 12):  # từ 1 -> 11
+            btn_sample = getattr(self.ui, f"btn_sample_{i}", None)
+            btn_stick = getattr(self.ui, f"btn_stick_{i}", None)
+            btn_delete = getattr(self.ui, f"btn_delete_{i}", None)
 
-        #     if btn:
-        #         btn.setVisible(False)   # hoặc btn.hide()
-        #     if lbl:
-        #         lbl.setVisible(False)   # hoặc lbl.hide()
+            if btn_sample:
+                btn_sample.setVisible(False)   # hoặc btn_sample.hide()
+            if btn_stick:
+                btn_stick.setVisible(False)   # hoặc btn_stick.hide()
+            if btn_delete:
+                btn_delete.hide()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
