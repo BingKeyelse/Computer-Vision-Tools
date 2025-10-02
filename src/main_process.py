@@ -52,9 +52,9 @@ class Canvas(QLabel):
         
     def resizeEvent(self, event)-> None:
         """
-        - Hàm event handler có sẵn của Qt
-        Khi widget đổi kích thước (ví dụ bạn kéo giãn cửa sổ), Qt tự động gọi hàm này.
-        Ta override để cập nhật lại cách hiển thị ảnh.
+        ## Hàm event handler có sẵn của Qt
+        - Khi widget đổi kích thước (ví dụ bạn kéo giãn cửa sổ), Qt tự động gọi hàm này.
+        - Ta override để cập nhật lại cách hiển thị ảnh.
         """
         if self.orig_image_Pixmap:
             # Scale ảnh theo kích thước của widget giờ ta có ảnh đã scale
@@ -85,16 +85,15 @@ class Canvas(QLabel):
         # Qt có sẵn event system, mỗi khi Widget thay đổi sẽ gọi tự động resizeEvent.
         super().resizeEvent(event)
         
-
-    def cvimg_to_qpixmap(self, cv_img):
+    def cvimg_to_qpixmap(self, cv_img: np.ndarray)-> QPixmap:
         """
-        # Chuyển ảnh từ OpenCV (numpy array BGR) → QPixmap để hiển thị trong QLabel
+        ## Chuyển ảnh từ OpenCV (numpy array BGR) → QPixmap để hiển thị trong QLabel
         Bởi vì Qlabel cần là đối tượng ở dạng QPixmap hoặc QImage
         - input 
-            - cv_img: đối tượng ảnh muốn chuyển dạng
+            - cv_img: đối tượng ảnh RGB muốn chuyển dạng Pixmap
 
         - output
-            - 
+            - pixmap: hình ảnh ở dạng Pixmap
         """
         if cv_img is None:
             return None
@@ -111,7 +110,12 @@ class Canvas(QLabel):
     
     def in_image_area(self, x: int, y: int)-> bool:
         """
-        Để xem là trỏ chuột có ở trong khung hình hay không 
+        ## Để xem là trỏ chuột có ở trong khung của hình ảnh hay không
+        - input
+            - x,y: tọa độ của chuột
+
+        - output:
+            - True or False
         """
         if not self.orig_image_Pixmap:
             return False
@@ -121,15 +125,16 @@ class Canvas(QLabel):
     
     def set_tool_manager(self, manager=None)-> None:
         """
-        Gắn ToolManager cho canvas. 
-        Nếu manager = None thì không làm gì cả.
+        ## Gắn ToolManager để xử dụng trong Canvas. 
+        - input:
+            - manager: là ToolManager mà bạn truyền vào
         """
         self.tool_manager = manager
 
     def mousePressEvent(self, event)->None:
         """
-        Sự kiện chuột nhấn --> ToolManager. Nó sẽ tự động chạy khi tương tác với Canvas
-        Nếu tool_manager = None thì return None (bỏ qua).
+        ## Sự kiện chuột nhấn --> ToolManager. 
+        - Nó sẽ tự động chạy khi tương tác với Canvas bằng self.update()
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:
@@ -138,7 +143,8 @@ class Canvas(QLabel):
 
     def mouseMoveEvent(self, event)-> None:
         """
-        Sự kiện chuột di chuyển --> ToolManager
+        ## Sự kiện chuột di chuyển --> ToolManager
+        - Nó sẽ tự động chạy khi tương tác với Canvas bằng self.update()
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:        
@@ -147,7 +153,8 @@ class Canvas(QLabel):
 
     def mouseReleaseEvent(self, event)-> None:
         """
-        Sự kiện chuột nhả ra --> ToolManager
+        ## Sự kiện chuột nhả ra --> ToolManager
+        - Nó sẽ tự động chạy khi tương tác với Canvas bằng self.update()
         """
         if self.in_image_area(event.x(), event.y()):
             if self.tool_manager:
@@ -156,15 +163,15 @@ class Canvas(QLabel):
 
     def paintEvent(self, event)-> None:
         """
-        Hàm vẽ lại giao diện. 
-        Gọi super().paintEvent để QLabel vẽ ảnh gốc trước,
+        ## Hàm vẽ lại giao diện tương tác với self.update()
+        - Gọi super().paintEvent để QLabel vẽ ảnh gốc trước,
         sau đó ToolManager sẽ vẽ thêm các shape/tool lên trên.
-        paintEvent sẽ tự động chạy lại khi 
-            widget được hiển thị lần đầu
-            widget bị che/hiện lại
-            widget thay đổi kích thước
-            gọi update() hoặc repaint()
-            widget nội bộ bị đổi (ví dụ ảnh mới, màu nền mới)
+        - paintEvent sẽ tự động chạy lại khi 
+            - widget được hiển thị lần đầu
+            - widget bị che/hiện lại
+            - widget thay đổi kích thước
+            - gọi update() hoặc repaint()
+            - widget nội bộ bị đổi (ví dụ ảnh mới, màu nền mới)
         """ 
         super().paintEvent(event)
         # print('Có thay đổi theo')
