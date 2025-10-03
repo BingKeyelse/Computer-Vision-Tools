@@ -18,21 +18,33 @@ class MouseTool:
     Hàm cơ sở của toàn bộ thao tác chuột gồm:
     nhấn. di, nhả, vẽ hình, trả lại shape cho ToolManager
     """
-    def on_mouse_down(self): pass
-    def on_mouse_move(self, x_offset=0, y_offset=0, scale=1.0): pass
-    def on_mouse_up(self): pass
-    def draw(self): pass
-    def reset_image(self): pass
+    def on_mouse_down(self): 
+        """Khi nhấn chuột chuột tạo ra giá trị vị trí liên quan"""
+        pass
+    def on_mouse_move(self): 
+        """Khi di chuột chuột tạo ra giá trị vị trí liên quan"""
+        pass
+    
+    def on_mouse_up(self): 
+        """Khi thả chuột tạo ra giá trị vị trí liên quan"""
+        pass
+    def draw(self): 
+        """Vẽ hình đang dùng để thao tác với giá trị mà chuột tương tác"""
+        pass
+    def reset_image(self):
+        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ
+        - start, end= None
+        """
+        pass
 
-    ## Thêm
     def get_shape(self):
         """Trả về dữ liệu hình đã vẽ xong (nếu có) gồm kiểu shape và thông số cần thiết"""
         return None
 
-from mouse.Box import BoxTool
-from mouse.Circle import CircleTool
-from mouse.OrientedBox import OrientedBoxTool
-from mouse.Polygon import PolygonTool
-from mouse.Tools import ToolManager
+from Function_mouse.Box import BoxTool
+from Function_mouse.Circle import CircleTool
+from Function_mouse.OrientedBox import OrientedBoxTool
+from Function_mouse.Polygon import PolygonTool
+from Function_mouse.Tools import ToolManager
 
-from Function_button import ButtonController
+from Function_button.Button_Manager import ButtonController

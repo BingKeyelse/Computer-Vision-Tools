@@ -3,48 +3,66 @@ from libs import*
 # ==== Quản lý tool ====
 class ToolManager:
     '''
-    Tool Manager là công cụ quản lý toàn bộ các tool bao gồm: Box, Circle, Oriented Box, Polygon
+    ## Tool Manager là công cụ quản lý toàn bộ các tool bao gồm: Box, Circle, Oriented Box, Polygon
     '''
     def __init__(self):
         self.active_tool = None
         ## Thêm
         self.shapes = []  # chứa các hình đã cắt (chấp nhận)
         self.counter = 0   # để đánh số id
-        self.image= None
-        self.link_image=None
+        self.image= None # chứa ảnh resize
+        self.link_image=None # chứa link ảnh để làm việc với ảnh gốc
 
-        self.scale_resize=1.0
+        self.scale_resize=1.0 # tỉ lệ ảnh resize mình muốn truyền
 
     def set_tool(self, tool: MouseTool): # type hint ( gợi ý kiểu)
-        """Chọn tool hiện tại để biết sẽ vẽ shape gì Box, Circle, Oriented Box, Polygon."""
+        """Chọn tool hiện tại để biết sẽ vẽ shape gì Box, Circle, Oriented Box, Polygon. --> self.active_tool"""
 
         self.active_tool = tool
 
     def handle_event(self, event_type, event, x_offset=0, y_offset=0, image_original=None, link_image= None)-> None:
-        """Gửi event cho tool đang active. như nhấn, nhả, di chuyển với chuột đang được chọn"""
+        """
+        ## Gửi event cho tool đang active. 
+        - Như nhấn, nhả, di chuyển với chuột đang được chọn
+        - input
+            - event_type: tên kiểu sự kiện
+            - event
+            - x_offset, y_offset: offset theo cả 2 chiều x, y
+            - image_original: hình ảnh gốc đã được resize
+            - link_image: link ảnh gốc 
+        """
 
         self.image = image_original
         self.link_image= link_image
 
-        print("ToolManager nhận image:", type(image_original), getattr(image_original, "shape", None))
+        # print("ToolManager nhận image:", type(image_original), getattr(image_original, "shape", None)) #Log
 
         if not self.active_tool:
             return
         if event_type == "mouse_down":
             self.active_tool.on_mouse_down(event)
         elif event_type == "mouse_move":
-            self.active_tool.on_mouse_move(event, x_offset, y_offset)
+            self.active_tool.on_mouse_move(event)
         elif event_type == "mouse_up":
             self.active_tool.on_mouse_up(event)
 
     def reset(self)-> None:
         """
-        Khi để reset lại hình khi mà nó đang được vẽ
+        ## Để reset khi đang vẽ hình và muốn xóa nó
+        - Reset giá trị start, end ở từng thằng đang active về None
         """
         self.active_tool.reset_image()
     
-    def cut(self, list_shape=None)-> None:
-        """Nhận hình hiện tại và reset tool."""
+    def cut(self, list_shape= None)-> list:
+        """
+        ## Nhận hình hiện tại và reset tool.
+        ## Lấy dữ kiện đã được cut về trả về cho thằng Sample làm việc
+        Lưu ý: toàn bộ kích thước là với ảnh nằm ở dạng size 100% nhé 
+        - input: 
+            - list_shape: mảng để dùng lưu trữ cho ông Sample
+        - output:
+            - list_shape: {mode, link_picture, data}
+        """
 
         if self.active_tool:
             shape = self.active_tool.get_shape()
@@ -69,34 +87,45 @@ class ToolManager:
             return list_shape
 
     def clear(self)-> None:
-        """Xoá toàn bộ hình"""
-
+        """Xoá toàn bộ hình đã đưuọc cut và lưu"""
         self.shapes.clear()
         self.counter=0
     
     def undo(self)-> None:
-        """Xoá hình cuối cùng"""
+        """Xoá hình cuối cùng được cut ở cuối cùng"""
 
         if self.shapes:
             self.shapes.pop()
             self.counter -= 1
     
-    def remove_SHAPE(self, idx=None):
-        if idx is not None:
-            self.shapes.pop(idx)
-            self.counter -= 1
+    # def remove_SHAPE(self, idx=None):
+    #     """
+    #     ## Dùng để xóa hình ảnh shape ở vị trí bất kì mình chỉ định
+    #     - input 
+    #         - idx: vị trí trong mảng mình muốn xóa
+    #     """
+    #     if idx is not None:
+    #         self.shapes.pop(idx)
+    #         self.counter -= 1
     
     def undo_polygon(self)-> None:
         """
-        Lệnh này giành riêng cho polygon thôi
+        Lệnh này giành riêng cho polygon thôi dùng để undo điểm đang vẽ
         """
         if isinstance(self.active_tool, PolygonTool):
             self.active_tool.undo_point()
 
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0)-> None:
-        """Vẽ các hình đã chấp nhận + hình đang thao tác.
-        Chuyển đổi vị trí tuyệt đối với ảnh thực tế kích thước thật
-        sang vị trí tuyệt đối so với ảnh scaled rồi tiếp tới mới là Widget
+        """
+        ## Vẽ các hình đã chấp nhận + hình đang thao tác.
+        - Chuyển đổi vị trí của:  anh size 100% --> ảnh resized đang được dùng
+        - Chuyển đổi vị trí của : ảnh resized đang được dùng --> ảnh được scaled
+        - Chuyển đổi vị trí của : ảnh được scaled --> offset vị trí tuyệt đối với Widget 
+        - input
+            - painter: bút lông để vẽ
+            - x_offset, y_offset: offset ảnh so với Widget
+            - ratio_base_image: tỉ lệ ảnh khi scaled
+            - scale: thực ra cái này là tỉ lệ resize mình chọn 
         """
 
         # Lấy tỉ lệ resize
@@ -255,14 +284,18 @@ class ToolManager:
                 painter.setPen(Qt.yellow)
                 painter.drawText(int(cx), int(cy) - 5, f"ID:{idx}")
 
-
         # vẽ hình đang thao tác (chưa cut)
         if self.active_tool:
             self.active_tool.draw(painter, x_offset, y_offset, ratio_base_image, self.scale_resize)
     
-    def crop_shape(self, link='', shape= None):
+    def crop_shape(self, link='', shape= None)-> np.ndarray:
         """
-        Toàn bộ kích thước và ảnh đều lấy ở định dạng 100% nhé 
+        ## Dùng chỉ để cắt ảnh với các shape mà mình định nghĩa
+        - input
+            - link: đường dẫn của link ảnh
+            - shape: giá trị data mà mình sẽ dùng để xử lý gồm {mode, link_picture, data}
+        - output:
+            - cropped_masked: ảnh được cut
         """
         if link=='' and not shape:
             return None
@@ -380,8 +413,12 @@ class ToolManager:
             #     self.save_cropped_image(cropped_masked)
         return cropped_masked
 
-    
     def save_cropped_image(self, cropped):
+        """
+        ## Dùng để save ảnh được cut với chỉ định folder nhé
+        - input
+            - cropped: ảnh muốn lưu
+        """
         if cropped.size == 0:
             return
 

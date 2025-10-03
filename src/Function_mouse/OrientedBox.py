@@ -2,100 +2,47 @@ from libs import*
 
 # ==== Tool cụ thể: vẽ Oriented Box ====
 class OrientedBoxTool(MouseTool):
+    '''
+    ## Tool để sử dụng cho mục đích vẽ hình chữ nhật có thể xoay được
+    '''
     def __init__(self):
+        """
+        Khởi tạo giá trị bắt đầu start và end
+        """
         self.start = None
         self.end = None
         self.angle = 0.0   # góc xoay (radian)
+
         self.mode = None
-        self.offset = (0, 0)
+        self.offset = (0, 0) # giá trị offset theo chiều x, y
 
         # Thêm các trạng thái cho resize
-        self.base_center = None
+        self.base_center = None #
         self.base_hw = None
         self.base_hh = None
         self.start_mouse = None
         self.resize_normal = None
 
-        self.start_img= None
-        self.end_img= None
+        self.start_img= None # giá trị start so với ảnh thực so thể resize
+        self.end_img= None # giá trị end so với ảnh thực so thể resize
 
-        self.start_img_100= None
-        self.end_img_100= None
+        self.start_img_100= None # giá trị start so với ảnh thực so thể size 100%
+        self.end_img_100= None # giá trị end so với ảnh thực so thể size 100%
 
-        self.scale_resize= 1.0
+        self.scale_resize= 1.0 # giá trị resize
 
     def reset_image(self)-> None:
-        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
+        """## Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.start = None
         self.end = None
 
-    def get_center(self)-> tuple[int, int]:
-        """Trả về tâm của hình chữ nhật hiện hiện tại dù nó có xoay hay không"""
-        x1, y1 = self.start
-        x2, y2 = self.end
-        return ((x1 + x2) / 2, (y1 + y2) / 2)
-
-    def get_corners(self)-> tuple[(int,int), (int,int), (int,int), (int,int)] | None:
-        """Trả về 4 toạ độ của các đỉnh sau khi xoay."""
-        if not self.start or not self.end:
-            return []
-        x1, y1 = self.start
-        x2, y2 = self.end
-
-        # Lấy tâm của hình hiện tại dù có xoay hay không
-        cx, cy = self.get_center()
-
-        w, h = abs(x2 - x1), abs(y2 - y1)
-        # Tọa độ box chuẩn (chưa xoay) so với tâm của hình chữ nhật gốc
-        # ------------→ w
-        # |
-        # |
-        # |
-        # |
-        # ↓ H
-        corners = [
-            (-w/2, -h/2), # Điểm trên cùng bên trái
-            ( w/2, -h/2), # Điểm trên cùng bên phải
-            ( w/2,  h/2), # Điểm dưới cùng bên phải
-            (-w/2,  h/2), # Điểm dưới cùng bên trái
-        ]
-
-        # Xoay ra góc để có các toạ độ đỉnh mới
-        cos_a, sin_a = np.cos(self.angle), np.sin(self.angle)
-        rotated = []
-        for (dx, dy) in corners:
-            rx = cx + dx*cos_a - dy*sin_a
-            ry = cy + dx*sin_a + dy*cos_a
-            rotated.append((rx, ry))
-        return rotated
-
-    def get_handle_point(self)-> tuple[int, int] | None:
-        """Tìm điểm giữa 2 điểm trên cùng -> dùng để vẽ điểm màu vàng"""
-        corners = self.get_corners()
-        if not corners:
-            return None
-        
-        # Lấy 2 điểm gần nhất trên cùng 
-        x1, y1 = corners[0]
-        x2, y2 = corners[1]
-        return (int((x1 + x2) / 2), int((y1 + y2) / 2))
-    
-    def get_edge_midpoint(self, edge_index: int) -> tuple[int, int] | None:
-        """Lấy trung điểm của 1 cạnh bất kỳ trong box.
-        edge_index: 0=trên-trái, 1=trên-phải, 2=dưới-phải, 3=dưới-trái
-        """
-        corners = self.get_corners()
-        if not corners or len(corners) != 4:
-            return None
-        
-        i1 = edge_index % 4
-        i2 = (edge_index + 1) % 4
-        x1, y1 = corners[i1]
-        x2, y2 = corners[i2]
-        return (int((x1 + x2) / 2), int((y1 + y2) / 2))
-
     def on_mouse_down(self, event)-> None:
-        """Xử lý sự kiện nhấn chuột."""
+        """
+        ## Thời điểm khi ấn xuống là xem có gần tâm của hình, hay cạnh nào không
+        - Nếu không khai báo giá trị toạ độ cho cả start và end mới
+        - start: x,y
+        - end:   x,y
+        """
         # Khởi tạo lúc đầu
         if not self.start or not self.end:
             self.start = (event.x(), event.y())
@@ -163,8 +110,13 @@ class OrientedBoxTool(MouseTool):
             self.start = (x, y)
             self.end = self.start
 
-    def on_mouse_move(self, event, x_offset, y_offset) -> None:
-        """Xử lý sự kiện di chuột."""
+    def on_mouse_move(self, event) -> None:
+        """
+        ## Khi chuột di chuyển thì cập nhập lại với từ mode đang ở hiện tại
+        - Nếu không ở mode nào thì cập nhập lại end
+        - end: x,y cập nhập theo chuột
+
+        """
         if not self.start or not self.end:
             return
         
@@ -213,6 +165,10 @@ class OrientedBoxTool(MouseTool):
             self.end = (x, y)
 
     def on_mouse_up(self, event)-> None:
+        """
+        ## Nếu thả ra thì đưa các mode về cơ bản
+        
+        """
         self.mode = None
         self.active_edge = None
         self.start_mouse = None
@@ -222,6 +178,11 @@ class OrientedBoxTool(MouseTool):
         self.resize_normal = None
 
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0)-> None:
+        """
+        ## Vẽ hình chữ nhật xoay tròn với khung đỏ, tâm hình và nền mờ trong suốt.
+        - Hình chữ nhật xoay tròn được vẽ bởi painter lấy từ ToolManager truyền cho
+        
+        """
         
         # Lấy scale resize kích thước ảnh
         self.scale_resize= scale
@@ -284,8 +245,90 @@ class OrientedBoxTool(MouseTool):
                     painter.setBrush(QBrush(Qt.red))
                     painter.drawEllipse(QPointF(*center_edge), 4, 4)
 
-
-    def get_shape(self)-> None:
+    def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int], float] | None:
+        """
+        ## Lấy tên của shape và giá trị start, end tuyệt đối trên ảnh kích thước thực tế để lưu và đặc biệt là với tọa độ ảnh 100%
+        - output : (shape: str, start_100, end_100, angle)
+        """
         if self.start_img_100 and self.end_img_100:
             return ("oriented_box", self.start_img_100, self.end_img_100, self.angle)
         return None
+
+    def get_center(self)-> tuple[int, int]:
+        """
+        ## Trả về tâm của hình chữ nhật hiện hiện tại dù nó có xoay hay không
+        - output
+            - Tọa độ tâm hình chữ nhật trạng thái xoay
+        """
+        x1, y1 = self.start
+        x2, y2 = self.end
+        return ((x1 + x2) / 2, (y1 + y2) / 2)
+
+    def get_corners(self)-> tuple[(int,int), (int,int), (int,int), (int,int)] | None:
+        """
+        ## Trả về 4 toạ độ của các đỉnh sau khi xoay.
+        - output
+            - Tọa độ 4 điểm lần lượt là (x1,y1), (x2,y2), (x3,y3), (x4,y4)
+        """
+        if not self.start or not self.end:
+            return []
+        x1, y1 = self.start
+        x2, y2 = self.end
+
+        # Lấy tâm của hình hiện tại dù có xoay hay không
+        cx, cy = self.get_center()
+
+        w, h = abs(x2 - x1), abs(y2 - y1)
+        # Tọa độ box chuẩn (chưa xoay) so với tâm của hình chữ nhật gốc
+        # ------------→ w
+        # |
+        # |
+        # |
+        # |
+        # ↓ H
+        corners = [
+            (-w/2, -h/2), # Điểm trên cùng bên trái
+            ( w/2, -h/2), # Điểm trên cùng bên phải
+            ( w/2,  h/2), # Điểm dưới cùng bên phải
+            (-w/2,  h/2), # Điểm dưới cùng bên trái
+        ]
+
+        # Xoay ra góc để có các toạ độ đỉnh mới
+        cos_a, sin_a = np.cos(self.angle), np.sin(self.angle)
+        rotated = []
+        for (dx, dy) in corners:
+            rx = cx + dx*cos_a - dy*sin_a
+            ry = cy + dx*sin_a + dy*cos_a
+            rotated.append((rx, ry))
+        return rotated
+
+    def get_handle_point(self)-> tuple[int, int] | None:
+        """
+        ## Tìm điểm giữa 2 điểm trên cùng -> dùng để vẽ điểm màu vàng
+        - output: Tọa độ điểm Handle ý 
+        """
+        corners = self.get_corners()
+        if not corners:
+            return None
+        
+        # Lấy 2 điểm gần nhất trên cùng 
+        x1, y1 = corners[0]
+        x2, y2 = corners[1]
+        return (int((x1 + x2) / 2), int((y1 + y2) / 2))
+    
+    def get_edge_midpoint(self, edge_index: int) -> tuple[int, int] | None:
+        """
+        ## Lấy trung điểm của 1 cạnh bất kỳ trong box.
+        - input
+            - edge_index: 0=trên-trái, 1=trên-phải, 2=dưới-phải, 3=dưới-trái
+        - output: Tọa độ trung điểm của cạnh
+        """
+        corners = self.get_corners()
+        if not corners or len(corners) != 4:
+            return None
+        
+        i1 = edge_index % 4
+        i2 = (edge_index + 1) % 4
+        x1, y1 = corners[i1]
+        x2, y2 = corners[i2]
+        return (int((x1 + x2) / 2), int((y1 + y2) / 2))

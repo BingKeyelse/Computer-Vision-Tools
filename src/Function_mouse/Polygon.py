@@ -6,20 +6,22 @@ class PolygonTool(MouseTool):
     Tool để sử dụng cho mục đích vẽ hình polygon chọn từng điểm một
     '''
     def __init__(self):
-        """Tool để vẽ polygon (đa giác)."""
+        """
+        Khởi tạo giá trị [] để chứa tọa độ các điểm tạo nên polygon
+        """
         self.points = []   # danh sách điểm [(x,y), (x,y), ...]
         self.is_finished = False  # cờ đánh dấu đã chốt polygon chưa
         self.points_image = [] 
         self.points_image_100 = [] 
     
     def reset_image(self)-> None:
-        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
+        """## Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.points = []
 
     def on_mouse_down(self, event) -> None:
         """
-        Thêm điểm mới vào polygon khi click chuột.
-        Nếu click gần điểm đầu tiên và số điểm >= 3 thì coi như khép polygon.
+        ## Thêm điểm mới vào polygon khi click chuột.
+        ## Nếu click gần điểm đầu tiên và số điểm >= 3 thì coi như khép polygon.
         """
         if self.is_finished:
             return
@@ -37,30 +39,27 @@ class PolygonTool(MouseTool):
                 self.points.append((x, y))
         return
 
-    def on_mouse_move(self, event, x_offset, y_offset) -> None:
-        """Có thể vẽ preview đường tạm từ điểm cuối đến chuột."""
+    def on_mouse_move(self, event) -> None:
+        """## Không có sự kiện di chuột với thao tác vẽ polygon"""
         pass  # tuỳ bạn muốn có preview không (nối điểm cuối tới chuột hiện tại)
 
     def on_mouse_up(self, event) -> None:
-        """Không cần gì đặc biệt."""
+        """## Không có sự kiện nhả chuột với thao tác vẽ polygon"""
         pass
 
     def undo_point(self) -> None:
-        """Xoá điểm cuối cùng khi đang vẽ."""
+        """## Xoá điểm cuối cùng khi đang vẽ. Thực hiện chức năng undo"""
         # if self.points and not self.is_finished:
         if self.points:
             self.points.pop()
             self.is_finished= False
 
-    def get_shape(self):
-        """Trả polygon khi đã hoàn tất (is_finished=True)."""
-        if self.is_finished and len(self.points_image_100) >= 3:
-            self.is_finished=False
-            return ("polygon", self.points_image_100)
-        return None
-
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0) -> None:
-        """Vẽ polygon đang thao tác."""
+        """
+        ## Vẽ hình polygon với khung đỏ, và nền mờ trong suốt.
+        - Hình polygon được vẽ bởi painter lấy từ ToolManager truyền cho
+        
+        """
         if not self.points:
             return
 
@@ -100,3 +99,13 @@ class PolygonTool(MouseTool):
             # vẽ điểm đầu + điểm cuối
             for (x, y) in self.points:
                 painter.drawEllipse(QPoint(x, y), 3, 3)
+    
+    def get_shape(self)-> tuple[str, list[tuple[int, int]]] | None:
+        """
+        ## Trả polygon khi đã hoàn tất (is_finished=True).
+        - output: ("polygon", [(x1, y1), (x2, y2), (x3, y3), ...])
+        """
+        if self.is_finished and len(self.points_image_100) >= 3:
+            self.is_finished=False
+            return ("polygon", self.points_image_100)
+        return None
