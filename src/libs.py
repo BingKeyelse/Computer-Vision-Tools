@@ -1,6 +1,6 @@
 import sys
 import os
-import cv2
+
 import numpy as np
 import math
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QApplication, QWi
                             QVBoxLayout, QFileDialog, QMenu, QAction, QApplication, QListWidget
 
 from pyqt5_ui.gui import Ui_MainWindow
+import cv2
 
 # ==== Base class cho tất cả tools ====
 class MouseTool:
