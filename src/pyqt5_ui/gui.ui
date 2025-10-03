@@ -228,39 +228,6 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QGroupBox" name="groupBox_9">
-               <property name="title">
-                <string>CAMERA</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_15">
-                <item row="1" column="1">
-                 <widget class="QPushButton" name="btn_check_cam">
-                  <property name="text">
-                   <string>Check Cam</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1">
-                 <widget class="QLabel" name="lb_size_cam">
-                  <property name="text">
-                   <string>Size</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QPushButton" name="btn_capture_cam">
-                  <property name="text">
-                   <string>Capture</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QComboBox" name="btn_choose_cam"/>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
               <widget class="QGroupBox" name="groupBox_8">
                <property name="title">
                 <string>IMAGE</string>
@@ -299,13 +266,6 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_3">
-                  <property name="text">
-                   <string>RESIZE: %</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="2" column="1">
                  <widget class="QComboBox" name="btn_resize">
                   <item>
@@ -338,6 +298,13 @@
                     <string>40</string>
                    </property>
                   </item>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_3">
+                  <property name="text">
+                   <string>RESIZE: %</string>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -993,42 +960,7 @@
                 <bool>true</bool>
                </property>
                <layout class="QGridLayout" name="gridLayout_2">
-                <item row="1" column="1">
-                 <widget class="QPushButton" name="btn_realtime">
-                  <property name="text">
-                   <string>REAL-TIME</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QPushButton" name="btn_calib">
-                  <property name="text">
-                   <string>CALIB</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QPushButton" name="btn_apply">
-                  <property name="text">
-                   <string>APPLY</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="btn_trigsoft">
-                  <property name="text">
-                   <string>TRIG-SOFT</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="0">
-                 <widget class="QPushButton" name="btn_light">
-                  <property name="text">
-                   <string>LIGHT</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
+                <item row="4" column="0">
                  <widget class="QComboBox" name="btn_color">
                   <item>
                    <property name="text">
@@ -1055,6 +987,58 @@
                     <string>YCrCb</string>
                    </property>
                   </item>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="btn_check_cam">
+                  <property name="text">
+                   <string>Check Cam</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="btn_realtime">
+                  <property name="text">
+                   <string>REAL-TIME</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QPushButton" name="btn_calib">
+                  <property name="text">
+                   <string>CALIB</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QPushButton" name="btn_apply">
+                  <property name="text">
+                   <string>APPLY</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QPushButton" name="btn_light">
+                  <property name="text">
+                   <string>LIGHT</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="btn_choose_cam"/>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="btn_trigsoft">
+                  <property name="text">
+                   <string>TRIG-SOFT</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="lb_size_cam">
+                  <property name="text">
+                   <string>Size</string>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -2165,7 +2149,7 @@
                <property name="currentIndex">
                 <number>0</number>
                </property>
-               <widget class="QWidget" name="page_detail_sample" native="true">
+               <widget class="QWidget" name="page_detail_sample">
                 <layout class="QGridLayout" name="gridLayout_16" rowstretch="10,18">
                  <property name="leftMargin">
                   <number>0</number>

@@ -3,11 +3,12 @@ from libs import*
 # ==== Tool cụ thể: vẽ Circle ====
 class CircleTool(MouseTool):# Tool hay diễn viễn Circle
     '''
-    Tool để sử dụng cho mục đích vẽ hình tròn
+    ## Tool để sử dụng cho mục đích vẽ hình tròn
     '''
     def __init__(self):
-        """Khởi tạo tool vẽ hình tròn."""
-
+        """
+        Khởi tạo giá trị bắt đầu start và end
+        """
         self.start = None
         self.end = None
 
@@ -23,12 +24,17 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         self.scale_resize= 1.0
 
     def reset_image(self)-> None:
-        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
+        """## Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.start = None
         self.end = None
 
     def on_mouse_down(self, event)-> None:
-        """Xử lý sự kiện nhấn chuột."""
+        """
+        ## Thời điểm khi ấn xuống là xem có gần tâm của hình, hay cạnh nào không
+        - Nếu không khai báo giá trị toạ độ cho cả start và end mới
+        - start: x,y
+        - end:   x,y
+        """
 
         if not self.start or not self.end:
             # nếu chưa có hình thì khởi tạo
@@ -53,15 +59,13 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
             self.end = self.start
             self.mode = None
 
-    def len_2_point(self, A: list, B: list)-> float:
-        """Tính khoảng cách 2 điểm"""
+    def on_mouse_move(self, event)-> None:
+        """
+        ## Khi chuột di chuyển thì cập nhập lại với từ mode đang ở hiện tại
+        - Nếu không ở mode nào thì cập nhập lại end
+        - end: x,y cập nhập theo chuột
 
-        len_x= (A[0]-B[0])**2
-        len_y= (A[1]-B[1])**2
-        return np.sqrt(len_x + len_y)
-
-    def on_mouse_move(self, event, x_offset=0, y_offset=0)-> None:
-        """Xử lý sự kiện rê chuột."""
+        """
 
         if not self.start or not self.end:
             return
@@ -84,12 +88,19 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
             self.end = (x, y)
 
     def on_mouse_up(self, event)-> None:
-        """Xử lý sự kiện nhả chuột."""
+        """
+        ## Nếu thả ra thì đưa mode về cơ bản
+        
+        """
 
         self.mode = None
 
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0) -> None:
-        """Vẽ hình tròn hiện tại lên canvas, gồm viền, tâm và lớp phủ mờ."""
+        """
+        ## Vẽ hình tròn với khung đỏ, tâm hình và nền mờ trong suốt.
+        - Hình tròn được vẽ bởi painter lấy từ ToolManager truyền cho
+        
+        """
 
         # Lấy scale resize kích thước ảnh
         self.scale_resize= scale
@@ -140,10 +151,23 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
             painter.setBrush(Qt.NoBrush)
             painter.setPen(QPen(Qt.red, 2))
 
-    ## Thêm
-    def get_shape(self)-> None:
-        """Trả về dữ liệu hình tròn (hoặc None nếu chưa có)."""
-
+    def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int]] | None:
+        """
+        ## Lấy tên của shape và giá trị start, end tuyệt đối trên ảnh kích thước thực tế để lưu và đặc biệt là với tọa độ ảnh 100%
+        - output : (shape: str, start_100, end_100)
+        """
         if self.start_img_100 and self.end_img_100:
             return ("circle", self.start_img_100, self.end_img_100)
         return None
+    
+    def len_2_point(self, A: list, B: list)-> float:
+        """## Tính khoảng cách 2 điểm
+        - input
+            - A, B: tọa độ 2 điểm cần tính
+        - output
+            - Khoảng cách 2 điểm
+        """
+
+        len_x= (A[0]-B[0])**2
+        len_y= (A[1]-B[1])**2
+        return np.sqrt(len_x + len_y)

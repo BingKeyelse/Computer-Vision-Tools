@@ -3,40 +3,39 @@ from libs import*
 # ==== Tool cụ thể: vẽ Box ====
 class BoxTool(MouseTool): # Tool hay diễn viễn Box
     '''
-    Tool để sử dụng cho mục đích vẽ hình chữ nhật
+    ## Tool để sử dụng cho mục đích vẽ hình chữ nhật
     '''
     def __init__(self):
         """
         Khởi tạo giá trị bắt đầu start và end
-
         """
         self.start = None
         self.end = None
 
         ## Thêm chức năng điều chỉnh
         self.mode = None  # "move", "resize", hoặc None
-        self.offset = (0, 0)
-        self.start_img= None
-        self.end_img= None
+        self.offset = (0, 0) # giá trị offset theo chiều x, y
 
-        self.start_img_100= None
-        self.end_img_100= None
+        self.start_img= None # giá trị start so với ảnh thực so thể resize
+        self.end_img= None # giá trị end so với ảnh thực so thể resize
 
-        self.scale_resize= 1.0
+        self.start_img_100= None # giá trị start so với ảnh thực so thể size 100%
+        self.end_img_100= None # giá trị end so với ảnh thực so thể size 100%
+
+        self.scale_resize= 1.0 # giá trị resize
 
     def reset_image(self)-> None:
-        """Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
+        """## Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.start = None
         self.end = None
 
 
     def on_mouse_down(self, event)-> None:
         """
-        Thời điểm khi ấn xuống là xem có gần tâm của hình, hay cạnh nào không
-        Nếu không khai báo giá trị toạ độ cho cả start và end mới
-        start: x,y
-        end:   x,y
-        
+        ## Thời điểm khi ấn xuống là xem có gần tâm của hình, hay cạnh nào không
+        - Nếu không khai báo giá trị toạ độ cho cả start và end mới
+        - start: x,y
+        - end:   x,y
         """
         # Khởi tạo lúc đầu
         if not self.start or not self.end:
@@ -70,11 +69,11 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             self.end = self.start
 
 
-    def on_mouse_move(self, event, x_offset, y_offset)-> None:
+    def on_mouse_move(self, event)-> None:
         """
-        Khi chuột di chuyển thì cập nhập lại với từ mode đang ở hiện tại
-        Nếu không ở mode nào thì cập nhập lại end
-        end: x,y cập nhập theo chuột
+        ## Khi chuột di chuyển thì cập nhập lại với từ mode đang ở hiện tại
+        - Nếu không ở mode nào thì cập nhập lại end
+        - end: x,y cập nhập theo chuột
 
         """
         if not self.start or not self.end:
@@ -117,7 +116,7 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
 
     def on_mouse_up(self, event)-> None:
         """
-        Nếu thả ra thì đưa mode về cơ bản
+        ## Nếu thả ra thì đưa mode về cơ bản
         
         """
         self.mode = None
@@ -125,8 +124,8 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
 
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0)-> None:
         """
-        Vẽ hình chữ nhật với khung đỏ, tâm hình và nền mờ trong suốt.
-        Hình chữ nhật được vẽ bởi painter lấy từ ToolManager truyền cho
+        ## Vẽ hình chữ nhật với khung đỏ, tâm hình và nền mờ trong suốt.
+        - Hình chữ nhật được vẽ bởi painter lấy từ ToolManager truyền cho
         
         """
         # Lấy scale resize kích thước ảnh
@@ -179,11 +178,10 @@ class BoxTool(MouseTool): # Tool hay diễn viễn Box
             # painter.drawLine(cx - 5, cy, cx + 5, cy)
             # painter.drawLine(cx, cy - 5, cx, cy + 5)
     
-    def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int]]:
+    def get_shape(self)-> tuple[str, tuple[int,int], tuple[int,int]] | None:
         """
-        Lấy tên của shape và giá trị start, end tuyệt đối trên ảnh kích thước thực tế để lưu
-        và đặc biệt là với tọa độ ảnh 100%
-        
+        ## Lấy tên của shape và giá trị start, end tuyệt đối trên ảnh kích thước thực tế để lưu và đặc biệt là với tọa độ ảnh 100%
+        - output : (shape: str, start_100, end_100)
         """
         if self.start_img_100 and self.end_img_100:
             # Trả lại theo tọa độ tuyệt đối so với ảnh
