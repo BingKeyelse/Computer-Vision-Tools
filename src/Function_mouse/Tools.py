@@ -313,8 +313,8 @@ class ToolManager:
             # print(image_100.shape)
 
             cropped_masked = image_100[top:bottom, left:right]
-            # if cropped_masked.size > 0:
-            #     self.save_cropped_image(cropped)
+            if cropped_masked.size > 0:
+                self.save_cropped_image(cropped_masked)
 
         elif shape_type == "circle":
             _, start, end = shape
@@ -342,8 +342,8 @@ class ToolManager:
             # giữ phần hình tròn, ngoài vùng là đen
             cropped_masked = cv2.bitwise_and(cropped, cropped, mask=mask)
 
-            # if cropped_masked.size > 0:
-            #     self.save_cropped_image(cropped_masked)
+            if cropped_masked.size > 0:
+                self.save_cropped_image(cropped_masked)
 
         elif shape_type=="polygon":
             _, points = shape
@@ -378,8 +378,8 @@ class ToolManager:
             # cv2.imwrite("debug_mask.png", mask)
             # cv2.imwrite("debug_result.png", cropped_masked)
 
-            # if cropped_masked.size > 0:
-            #     self.save_cropped_image(cropped_masked)
+            if cropped_masked.size > 0:
+                self.save_cropped_image(cropped_masked)
 
 
         elif shape_type=="oriented_box":
@@ -409,8 +409,8 @@ class ToolManager:
             # Áp mask → trong rotated rect giữ nguyên, ngoài = đen
             cropped_masked = cv2.bitwise_and(cropped, cropped, mask=mask)
 
-            # if cropped_masked.size > 0:
-            #     self.save_cropped_image(cropped_masked)
+            if cropped_masked.size > 0:
+                self.save_cropped_image(cropped_masked)
         return cropped_masked
 
     def save_cropped_image(self, cropped):

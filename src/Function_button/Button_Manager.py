@@ -30,10 +30,9 @@ class ButtonController:
         self.ui.btn_shape.currentTextChanged.connect(self.change_tool) # Singal tự gửi được Toolname của QListWidget
         self.ui.btn_cut.clicked.connect(lambda: (self.get_shape_and_update(), self.canvas.update()))
         self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.clear(), self.canvas.update()))
-        # self.ui.btn_clear.clicked.connect(lambda: self.sample_button.clear_Sample)
+        self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
         self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.undo(), self.canvas.update()))
         self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
-        # self.ui.btn_undo.clicked.connect(lambda: self.sample_button.undo_Sample)
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
         self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
 
@@ -239,7 +238,7 @@ class Sample_button:
         for i in range(1, 12):
             btn_stick = getattr(self.ui, f"btn_stick_{i}", None)
             if btn_stick:
-                btn_stick.clicked.connect(lambda _, idx=i: self.show_image_Sample(idx))
+                btn_stick.clicked.connect(lambda _, idx=i: self.stick_Sample(idx))
 
         # Setup click with sample Sample
         for i in range(1, 12):
@@ -253,17 +252,34 @@ class Sample_button:
             if btn_delete:
                 btn_delete.clicked.connect(lambda _, idx=i: self.remove_Sample(idx))
     
-    def stick_Sample(self, idx=None):
+    def stick_Sample(self, idx=None)-> None:
+        """
+        ## Bấm stick nào được chọn và thay đổi mode
+        - input
+            - idx: giá trị idx muốn thay đổi mode
+        """
         if idx is None:
             return
-        
-        
-
-        
-
-        
-        
+        # Lấy giá trị mode phù hợp với idx
+        mode = self.data_SHAPE[idx-1]['mode']
+        # Toggle mode
+        self.data_SHAPE[idx-1]['mode'] = 1 if mode == 0 else 0
+        self.control_stick_Sample()
     
+    def control_stick_Sample(self):
+        """
+        ## Bộ kiểm soát stick hiển thị chọn hay không được chọn
+        """
+        for idx, data in enumerate(self.data_SHAPE):
+            btn_stick = getattr(self.ui, f"btn_stick_{idx+1}", None)
+            if not btn_stick:
+                continue
+
+            if data['mode'] == 1:
+                btn_stick.setStyleSheet("background-color: green")
+            else:
+                btn_stick.setStyleSheet("background-color: white")
+
     def remove_Sample(self,idx=None)-> None:
         """
         ## Xóa Sample vởi chỉ định rõ ràng idx
@@ -273,6 +289,7 @@ class Sample_button:
         if idx is not None:
             self.data_SHAPE.pop(idx-1)
             # self.tool_manager.remove_SHAPE(idx-1)
+            self.control_stick_Sample()
             self.show_Sample()
             self.canvas.update()
     
@@ -285,7 +302,7 @@ class Sample_button:
             self.show_Sample()
             self.canvas.update()
     
-    def clear_Sample(self):
+    def clear_Sample(self)-> None:
         """
         ## Lệnh này là để tương tác với clear bên Tool Shape
         """
@@ -294,7 +311,7 @@ class Sample_button:
         self.show_Sample()
         self.canvas.update()
             
-    def show_Sample(self):
+    def show_Sample(self)-> None:
         """
         ## Hiện thị nút nhấn bên Sample Tool
         """
@@ -313,7 +330,7 @@ class Sample_button:
             if btn_delete:
                 btn_delete.show()
     
-    def hide_Sample(self):
+    def hide_Sample(self)-> None:
         """
         ## Ẩn toàn bộ nút nhấn bên Sample
         - Thường dùng để reset
@@ -330,7 +347,7 @@ class Sample_button:
             if btn_delete:
                 btn_delete.hide()
     
-    def show_image_Sample(self, idx):
+    def show_image_Sample(self, idx)-> None:
         """
         ## Show ảnh trên canvas Sample để hiển thị ảnh
         - Đọc link ảnh cho vào crop shape để lấy định dạng 100%
