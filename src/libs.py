@@ -1,17 +1,23 @@
 import sys
 import os
-import cv2
+
 import numpy as np
 import math
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtCore import Qt, QPoint, QPointF, QTimer
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QBrush, QColor, QPolygon, QPainterPath, QPolygonF
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QApplication, QWidget, QPushButton,\
-                            QVBoxLayout, QFileDialog, QMenu, QAction, QApplication, QListWidget
+                            QVBoxLayout, QFileDialog, QMenu, QAction, QApplication, QListWidget, QMessageBox, QComboBox
 
 from pyqt5_ui.gui import Ui_MainWindow
+import cv2
 
-# ==== Base class cho tất cả tools ====
+import glob
+from abc import ABC, abstractmethod
+from typing import Union
+from pypylon import pylon
+
+# ==== Base Mouse cho tất cả tools ====
 class MouseTool:
     """
     Hàm cơ sở của toàn bộ thao tác chuột gồm:
@@ -39,6 +45,39 @@ class MouseTool:
     def get_shape(self):
         """Trả về dữ liệu hình đã vẽ xong (nếu có) gồm kiểu shape và thông số cần thiết"""
         return None
+    
+
+# ==== Base Camera cho tất cả tools ====
+class BaseCamera(ABC):
+    """
+    ## Base """
+    def __init__(self, name):
+        self.name = name
+        self.cap = None
+        self.connected = False
+
+    @abstractmethod 
+    def connect(self):
+        """
+        Hàm connect: Request Override
+        """
+        pass
+
+    @abstractmethod 
+    def get_frame(self):
+        """
+        Hàm get frame: Request Override
+        """
+        pass
+
+    def disconnect(self):
+        """
+        Hàm Disconect: Unrequest Override
+        """
+        if self.cap:
+            self.cap.release()
+            self.cap = None
+        self.connected = False
 
 from Function_mouse.Box import BoxTool
 from Function_mouse.Circle import CircleTool
@@ -47,3 +86,11 @@ from Function_mouse.Polygon import PolygonTool
 from Function_mouse.Tools import ToolManager
 
 from Function_button.Button_Manager import ButtonController
+from Function_button.Button_camera import CameraFunctions 
+
+# Camera
+from camera.Camera_USB import USBCamera
+from camera.Camera_Basler import BaslerCamera
+from camera.Init_camera import CreateNameCamera
+
+
