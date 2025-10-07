@@ -1,7 +1,7 @@
 from libs import*
 
 class ButtonController:
-    def __init__(self, ui, tool_manager, canvas, canvas_Sample):
+    def __init__(self, ui, tool_manager, canvas, canvas_Sample, cam_function):
         """
         Chứa tất cả các hàm liên quan đến Button
         """
@@ -9,6 +9,8 @@ class ButtonController:
         self.tool_manager= tool_manager
         self.canvas= canvas
         self.canvas_Sample= canvas_Sample
+
+        self.camera_function = cam_function
 
         # Function Camera
         self.image=None
@@ -18,6 +20,8 @@ class ButtonController:
         # Function ToolBar
         self.link_picutures= []
         self.ui.btn_open.clicked.connect(self.get_link_image)
+        self.ui.btn_save.clicked.connect(self.save_current_frame) #Ken
+
         # self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom
         # self.ui.list_image.customContextMenuRequested.connect(self.show_list_menu)# Khi bạn bấm chuột phải vào thì phát singal tới slot được định, và auto truyền pos
         
@@ -36,6 +40,12 @@ class ButtonController:
         # self.ui.btn_undo.clicked.connect(lambda: self.sample_button.undo_Sample)
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
         self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
+
+        #Ken
+        self.ui.btn_check_cam.clicked.connect(lambda: self.camera_function.check_cameras())
+        # self.ui.btn_trigsoft.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
+        # self.ui.btn_chosse_cam.currentTextChanged.connect(self.change_tool) # Singal tự gửi được Toolname của QListWidget
+        # #Ken
 
     def get_shape_and_update(self):
         """
@@ -131,6 +141,33 @@ class ButtonController:
         # Show ảnh luôn        
         self.choose_selected_item()
         return None
+
+    def save_current_frame(self):
+        """
+        Lưu ảnh hiện tại từ camera realtime xuống file
+        """
+        if not self.active_cam:
+            QMessageBox.information(self, "Info", "Không có camera đang chạy.")
+            return
+
+        frame = self.active_cam.get_frame()
+        if frame is None:
+            QMessageBox.warning(self, "Warning", "Không lấy được frame từ camera!")
+            return
+
+        # Mở hộp thoại lưu file
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Lưu ảnh",
+            "",  # thư mục mặc định
+            "Image Files (*.png *.jpg *.jpeg *.bmp)"
+        )
+
+        if file_path:
+            # Lưu ảnh bằng OpenCV (ảnh đang là BGR)
+            cv2.imwrite(file_path, frame)
+            QMessageBox.information(self, "Success", f"Đã lưu ảnh tại:\n{file_path}")
+
     
     def show_list_menu(self, pos):
         """

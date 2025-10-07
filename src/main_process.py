@@ -188,7 +188,16 @@ class Canvas(QLabel):
             # painter = QPainter(self) # QPainter chính là cây cọ trong Qt,
             # self.tool_manager.draw(painter) # Đưa cọ cho ToolManager để nó vứt cho thằng nào thì vứt để sài
             self.tool_manager.draw(painter, self.x_offset, self.y_offset, self.ratio_base_image, self.scale)
-
+    
+    def clear_image(self): #Ken
+        """
+        Xóa ảnh hiện tại trên Canvas
+        """
+        self.original_image = None
+        self.link_image = None
+        self.orig_image_Pixmap = None
+        self.image_scaled = None
+        self.update()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -215,7 +224,7 @@ class MainWindow(QMainWindow):
         # QTimer.singleShot(100, lambda: print(
         #     "AFTER SHOW:",
         #     self.ui.screen_main.width(), self.ui.screen_main.height(),
-        #     self.canvas.width(), self.canvas.height()
+        #     self.canvas.width(), self.canvas.height()an
         # ))
 
         layout = QVBoxLayout(self.ui.screen_main) # Gắn 1 layout để quản lý toàn bộ thông tin bên trong của label
@@ -236,11 +245,15 @@ class MainWindow(QMainWindow):
         self.canvas_Sample = Canvas(parent=self.ui.label_5)
         layout_Sample = QVBoxLayout(self.ui.label_5) 
         layout_Sample.setContentsMargins(0,0,0,0) 
-        layout_Sample.addWidget(self.canvas_Sample) 
+        layout_Sample.addWidget(self.canvas_Sample)
 
+        self.timer = QTimer()
+        self.initial_cam = CreateNameCamera() #Ken
+        self.cameras = self.initial_cam.cameras #Ken
+        self.cam_function = CameraFunctions(self.ui, self.cameras, self.timer, self.canvas) #Ken
         # Viết chức năng cho từng nút nhấn riêng
-        self.button_controller = ButtonController(self.ui, self.tool_manager, self.canvas, self.canvas_Sample)
-
+        self.button_controller = ButtonController(self.ui, self.tool_manager, self.canvas, self.canvas_Sample, self.cam_function)   #Ken add more cam function
+        
         # Tạo custom với ListWidget của ListImage và tạo singal với slot (hàm) muốn custom
         self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom
         self.ui.list_image.customContextMenuRequested.connect(        # Tạo signal kết nối với slot chỉ định 
