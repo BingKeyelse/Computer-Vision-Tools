@@ -41,12 +41,6 @@ class ButtonController:
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
         self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
 
-        #Ken
-        self.ui.btn_check_cam.clicked.connect(lambda: self.camera_function.check_cameras())
-        # self.ui.btn_trigsoft.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
-        # self.ui.btn_chosse_cam.currentTextChanged.connect(self.change_tool) # Singal tự gửi được Toolname của QListWidget
-        # #Ken
-
     def get_shape_and_update(self):
         """
         ## Cập nhập data shape và update Shape bar

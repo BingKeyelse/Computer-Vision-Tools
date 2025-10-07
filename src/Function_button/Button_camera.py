@@ -1,38 +1,44 @@
 from libs import*
 
 class CameraFunctions:
-    def __init__(self, ui, cameras, timer, canvas):
+    def __init__(self, ui, cameras, timer_0, canvas):
         """
-        combo   : QComboBox để chọn camera
-        label   : QLabel để hiển thị hình ảnh
-        timer   : QTimer để update frame liên tục
-        cameras : dict chứa danh sách camera {"name": camera_obj}
+        ## Kế thừa các giá trị từ mainWindow
+        - ui: phần giao diện thừa kế
+        - cameras: thừa kế toàn bộ giá trị Camera
+        - timer: bộ đếm timer
+        - canvas: phần thừa kế để hiện thị ảnh ở phần chính giữa để chạy phần camera Realtime
+        
         """
         self.ui = ui
         self.canvas = canvas
-        self.timer = timer
+        self.timer_0 = timer_0
         self.cameras = cameras
 
         self.active_cam = None
         self.active_name = None
+
+        self.ui.btn_check_cam.clicked.connect(self.check_cameras)
 
         self.ui.btn_trigsoft.clicked.connect(self.capture_frame)
 
         # Gắn signal thay đổi camera
         self.ui.btn_choose_cam.addItem("None")
         self.ui.btn_choose_cam.currentTextChanged.connect(self.select_camera)
-        self.timer.timeout.connect(self.update_frame)
+        self.timer_0.timeout.connect(self.update_frame)
 
-    def check_cameras(self):
-        # 🚫 tạm chặn signal để tránh gọi select_camera('') khi clear
-        print("aa")
+    def check_cameras(self)-> None:
+        """
+        ## Kiểm tra camera check xem cái nào đang có
+        """
+        # 🚫 Tạm chặn signal để tránh gọi select_camera('') khi clear
         self.ui.btn_choose_cam.blockSignals(True)
         self.ui.btn_choose_cam.clear()
         self.ui.btn_choose_cam.addItem("None")
 
         available = []
         for name, cam in self.cameras.items():
-            cam.connect()
+            cam.connect() # Cho chúng nó kết nối hết luôn đi
             if cam.connected:
                 self.ui.btn_choose_cam.addItem(name)
                 available.append(name)
@@ -46,22 +52,29 @@ class CameraFunctions:
             self.active_name = None
             self.ui.btn_choose_cam.setCurrentText("None")
             # self.label.setText("No Camera")
-            self.timer.stop()
+            self.timer_0.stop()
 
         self.ui.btn_choose_cam.blockSignals(False)
 
-    def select_camera(self, name):
-        if not name or name == "None":  # chống chuỗi rỗng
+    def select_camera(self, name) -> None:
+        """
+        ## Lựa chọn camera sẽ đưuọc hiển thị 
+        - name: tên của đối tượng camera sẽ được tự động tuyền vào
+        """
+        if not name or name == "None":  
+            '''
+            Khi mà không có cam thì clear nó đi và nhớ cập nhập ở canvas
+            '''
             self.active_cam = None
             self.active_name = None
             self.canvas.clear_image()
-            self.timer.stop()
+            self.timer_0.stop()
             return
 
         if name not in self.cameras:
             return
 
-        cam = self.cameras[name]
+        cam = self.cameras[name] # Lấy toàn bộ đối tượng ra luôn
         if not cam.connected:
             QMessageBox.warning(self, "Warning", f"{name} chưa được kết nối! Hãy bấm 'Check All Cameras' trước.")
             self.combo.setCurrentText("None")
@@ -69,29 +82,30 @@ class CameraFunctions:
 
         self.active_cam = cam
         self.active_name = name
-        self.timer.start(30)
+        self.timer_0.start(30)
 
     def update_frame(self):
+        """
+        ## Hiển thị video thu thập lên trên canvas + Timer 0
+        """
         if self.active_cam:
             frame = self.active_cam.get_frame()
-            if frame is not None:
+            if frame is not None: 
                 self.canvas.set_image(frame, link_image = None)
             else:
-                # camera mất kết nối khi đang stream
-                # self.label.setText("No Camera")
-                self.timer.stop()
+                '''Camera mất kết nối khi đang stream'''
+                self.timer_0.stop()
                 self.active_cam = None
                 self.active_name = None
                 self.ui.btn_choose_cam.setCurrentText("None")
 
-    def capture_frame(self):
+    def capture_frame(self)-> None:
+        """
+        Dùng để chụp ảnh lại và sẽ lưu vào folder
+        """
         if self.active_cam:
             frame = self.active_cam.get_frame()
             if frame is not None:
                 cv2.imshow(f"Captured from {self.active_name}", frame)
                 cv2.waitKey(1)
 
-        #     else:
-        #         QMessageBox.warning(self, "Warning", "Không lấy được frame từ camera!")
-        # else:
-        #     QMessageBox.information(self, "Info", "Không có camera nào đang stream.")

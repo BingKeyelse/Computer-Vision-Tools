@@ -1,5 +1,7 @@
 from libs import*
 
+# ================Canvas===================================
+
 class Canvas(QLabel):
     def __init__(self, parent=None):
         """
@@ -189,9 +191,9 @@ class Canvas(QLabel):
             # self.tool_manager.draw(painter) # Đưa cọ cho ToolManager để nó vứt cho thằng nào thì vứt để sài
             self.tool_manager.draw(painter, self.x_offset, self.y_offset, self.ratio_base_image, self.scale)
     
-    def clear_image(self): #Ken
+    def clear_image(self)-> None: 
         """
-        Xóa ảnh hiện tại trên Canvas
+        Mục đích dùng để clear và xóa ảnh đang được show trên Canvas
         """
         self.original_image = None
         self.link_image = None
@@ -247,10 +249,13 @@ class MainWindow(QMainWindow):
         layout_Sample.setContentsMargins(0,0,0,0) 
         layout_Sample.addWidget(self.canvas_Sample)
 
-        self.timer = QTimer()
-        self.initial_cam = CreateNameCamera() #Ken
-        self.cameras = self.initial_cam.cameras #Ken
-        self.cam_function = CameraFunctions(self.ui, self.cameras, self.timer, self.canvas) #Ken
+        # Khởi tạo timer dùng cho quản lý Camera 
+        self.timer_0 = QTimer() 
+
+        # Khởi tạo kiểu cam và phân loại kết nối phù hợp usb hay basler
+        self.initial_cam = CreateNameCamera() 
+        self.cameras = self.initial_cam.cameras 
+        self.cam_function = CameraFunctions(self.ui, self.cameras, self.timer_0, self.canvas) #Ken
         # Viết chức năng cho từng nút nhấn riêng
         self.button_controller = ButtonController(self.ui, self.tool_manager, self.canvas, self.canvas_Sample, self.cam_function)   #Ken add more cam function
         
