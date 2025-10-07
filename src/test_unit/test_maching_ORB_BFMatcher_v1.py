@@ -2,7 +2,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 def match_images(img1_path, img2_path, max_matches=50):
-    # Đọc ảnh
+    # Đọc ảnh Gray
     img1 = cv2.imread(img1_path, cv2.IMREAD_GRAYSCALE)
     img2 = cv2.imread(img2_path, cv2.IMREAD_GRAYSCALE)
 
@@ -18,9 +18,12 @@ def match_images(img1_path, img2_path, max_matches=50):
 
     # Dùng Brute-Force matcher (Hamming vì ORB dùng binary descriptor)
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    # Có thể dùng được thêm cv2.FlannBasedMatcher để thay thế thằng này cv2.BFMatcher
 
     # Matching
     matches = bf.match(des1, des2)
+    print(f'Số điểm giống nhau bắt được là {len(matches)}')
+    
 
     # Sắp xếp theo khoảng cách (distance càng nhỏ càng giống)
     matches = sorted(matches, key=lambda x: x.distance)
@@ -35,4 +38,4 @@ def match_images(img1_path, img2_path, max_matches=50):
     plt.show()
 
     return matches, kp1, kp2
-matches, kp1, kp2 = match_images(r"src\data\sample\1.jpg", r"src\data\sample\sample.jpg", max_matches=30)
+matches, kp1, kp2 = match_images(r"src\data\sample\2.jpg", r"src\data\sample\sample.jpg", max_matches=30)
