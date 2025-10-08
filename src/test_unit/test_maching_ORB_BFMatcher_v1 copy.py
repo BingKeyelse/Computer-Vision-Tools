@@ -87,4 +87,4 @@ def match_and_draw_box_rotated(img1_path, img2_path, max_matches=50):
 
     return matches, kp1, kp2
 
-matches, kp1, kp2 = match_and_draw_box_rotated(r"src\data\sample\sample_1.jpg", r"src\data\sample\2.jpg", max_matches=30)
+matches, kp1, kp2 = match_and_draw_box_rotated(r"src\data\sample\sample_1.jpg", r"src\data\sample\3.jpg", max_matches=30)

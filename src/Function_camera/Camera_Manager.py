@@ -23,7 +23,7 @@ class CameraFactory:
         """
         ## Truyền đối số vào class với tùy chọn là key 
         - input
-            - class: 'usb' hay 'basler' lấy Key
+            - cls: 'usb' hay 'basler' lấy Key
             - type camera: gán tên phù hợp
             - name: dùng để phân biệt 
         - output
@@ -48,7 +48,7 @@ class CreateNameCamera:
         # Với Key tùy biến truyền paremeter tùy chọn
         self.cameras = {
             "USB Cam 0": CameraFactory.create("usb", "USB Cam 0", index=0),
-            "USB Cam 1": CameraFactory.create("usb", "USB Cam 1", index=2),
+            "USB Cam 1": CameraFactory.create("usb", "USB Cam 1", index=1),
             "Basler Cam A": CameraFactory.create("basler", "Basler Cam A", serial="21573780"),
             "Basler Cam B": CameraFactory.create("basler", "Basler Cam B", serial="22015482"),
         }

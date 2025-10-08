@@ -48,7 +48,7 @@ class ButtonController:
         """
         if len(self.data_SHAPE)<12:
             self.data_SHAPE= self.tool_manager.cut(self.data_SHAPE)
-            print(len(self.data_SHAPE))
+            print(self.data_SHAPE)
             self.sample_button.show_Sample()
 
     def resize_image(self, size_text)-> None:

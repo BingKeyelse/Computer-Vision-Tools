@@ -16,6 +16,7 @@ import glob
 from abc import ABC, abstractmethod
 from typing import Union
 from pypylon import pylon
+import time
 
 # ==== Base Mouse cho tất cả tools ====
 class MouseTool:
@@ -50,7 +51,8 @@ class MouseTool:
 # ==== Base Camera cho tất cả tools ====
 class BaseCamera(ABC):
     """
-    ## Base """
+    ## Base Camera
+    """
     def __init__(self, name):
         self.name = name
         self.cap = None
@@ -79,6 +81,22 @@ class BaseCamera(ABC):
             self.cap = None
         self.connected = False
 
+# ==== Base Matcher cho tất cả tools ====
+class BaseMatcher(ABC):
+    def __init__(self, image_path, data):
+        self.image_path = image_path
+        self.data = data  # có thể là box, circle, polygon...
+        self.template = None
+
+    @abstractmethod
+    def load_template(self):
+        pass
+
+    @abstractmethod
+    def match(self, scene):
+        """Trả về dict: { 'type': ..., 'box': ..., 'score': ..., 'angle': ... }"""
+        pass
+
 from Function_mouse.Box import BoxTool
 from Function_mouse.Circle import CircleTool
 from Function_mouse.OrientedBox import OrientedBoxTool
@@ -86,11 +104,18 @@ from Function_mouse.Polygon import PolygonTool
 from Function_mouse.Tools import ToolManager
 
 from Function_button.Button_Manager import ButtonController
-from Function_button.Button_camera import CameraFunctions 
+from Function_button.Button_Camera import CameraFunctions 
 
 # Camera
-from camera.Camera_USB import USBCamera
-from camera.Camera_Basler import BaslerCamera
-from camera.Init_camera import CreateNameCamera
+from Function_camera.Camera_USB import USBCamera
+from Function_camera.Camera_Basler import BaslerCamera
+from Function_camera.Camera_Manager import CreateNameCamera
+
+# Matching
+from Function_maching.Matching_Box import BoxMatcher
+from Function_maching.Matching_Circle import CircleMatcher
+from Function_maching.Matching_Polygon import PolygonMatcher
+
+from Function_maching.Matching_Manager import MatcherFactory
 
 

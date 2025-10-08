@@ -76,9 +76,9 @@ class CameraFunctions:
 
         cam = self.cameras[name] # Lấy toàn bộ đối tượng ra luôn
         if not cam.connected:
-            QMessageBox.warning(self, "Warning", f"{name} chưa được kết nối! Hãy bấm 'Check All Cameras' trước.")
-            self.combo.setCurrentText("None")
-            return
+            # QMessageBox.warning(self, "Warning", f"{name} chưa được kết nối! Hãy bấm 'Check All Cameras' trước.")
+            # self.combo.setCurrentText("None")
+            return None
 
         self.active_cam = cam
         self.active_name = name

@@ -9,6 +9,11 @@ class USBCamera(BaseCamera):
             - index: chỉ định index để phân loại khác biệt ra
         """
         super().__init__(name) # Gọi tới phần khởi tạo init của BaseCamera luôn, được tái sử dụng và thừa kế trong đây luôn
+        '''
+        self.name = name
+        self.cap = None
+        self.connected = False
+        '''
         self.index = index
 
     def connect(self):
