@@ -1,7 +1,7 @@
 from libs import*
 
 class ButtonController:
-    def __init__(self, ui, tool_manager, canvas, canvas_Sample, cam_function):
+    def __init__(self, ui, tool_manager, canvas, canvas_Sample, cam_function, data_functions):
         """
         Chứa tất cả các hàm liên quan đến Button
         """
@@ -11,6 +11,7 @@ class ButtonController:
         self.canvas_Sample= canvas_Sample
 
         self.camera_function = cam_function
+        self.Data_Functions= data_functions
 
         # Function Camera
         self.image=None
@@ -40,8 +41,9 @@ class ButtonController:
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas_Image.update()))
         self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas_Image.update()))
 
-        # Button cho phần chuyển màn của Camera và Image
-        self.ui.btn_check_cam
+        # Tạo Matching button, truyền chính self ( instance ButtonController)
+        self.sample_button = Matching_button(self)
+
 
     def get_shape_and_update(self):
         """
@@ -246,6 +248,32 @@ class ButtonController:
         """## Dùng để lấy thông tin kích thước của ảnh"""
         h, w = image.shape[:2]
         self.ui.label_camera.setText(f'IMAGE: {h}x{w}')
+
+    
+    def check_value_int_line_edit(self, obj)-> int:
+        """
+        ## Check nếu giá trị không đúng trả về giá trị 0
+        - Inputs:
+            - obj: truyền vào label hay editText muốn lấy giá trị
+        """
+        value= obj.text()
+        if self.Check_convert_str_to_int(value)==True:
+            return int(value)
+        else:
+            return 0
+        
+    
+    def Check_convert_str_to_int(self,number_check)-> bool:
+        """
+        ## Kiểm tra xem có chuyển được string sang INT không
+        - Inputs:
+            - number_check: giá trị cần kiểm
+        """
+        try:
+            int(number_check)
+            return True
+        except ValueError:
+            return False
     
 
 class Sample_button:
@@ -260,6 +288,8 @@ class Sample_button:
             - tool_manager: phần thừa thế Tool Manager 
             - canvas: phần thừa kế để hiện thị ảnh ở phần chính giữa
             - canvas_Sample: phần thừa kế để hiện thị ảnh Sample
+            - data_SHAPE: dữ liệu data_SHAPE kế thừa từ ButtonController để tiện sử dụng và cập nhập 
+            - Data_Functions: thừa kế class DatabaseController
         """
         # super().__init__(ui, tool_manager, canvas, canvas_Sample) phải lấy lại hết đối số này nhé
         self.controller= controller
@@ -268,6 +298,7 @@ class Sample_button:
         self.canvas_Image = controller.canvas_Image
         self.canvas_Sample = controller.canvas_Sample
         self.data_SHAPE = controller.data_SHAPE
+        self.Data_Functions = controller.Data_Functions
 
         # Setup click with stick Sample
         for i in range(1, 12):
@@ -400,3 +431,118 @@ class Sample_button:
 
         # Truyền cv2 image vào canvas
         self.canvas_Sample.set_image(image, link)
+
+class Matching_button:
+    """
+    ## Chức năng button dành riêng cho phần Matching Controller
+    """
+    def __init__(self, controller: ButtonController):
+        """
+        ## Khởi tạo biến để chạy chức năng cho phần Sample Button
+        - Phải có đủ các đối tượng thừa kết từ ButtonController
+            - ui: phần giao diện thừa kế
+            - tool_manager: phần thừa thế Tool Manager 
+            - canvas: phần thừa kế để hiện thị ảnh ở phần chính giữa
+            - canvas_Sample: phần thừa kế để hiện thị ảnh Sample
+            - data_SHAPE: dữ liệu data_SHAPE kế thừa từ ButtonController để tiện sử dụng và cập nhập 
+            - Data_Functions: thừa kế class DatabaseController
+        """
+        # super().__init__(ui, tool_manager, canvas, canvas_Sample) phải lấy lại hết đối số này nhé
+        self.controller= controller
+        self.ui= controller.ui
+        self.tool_manager = controller.tool_manager
+        self.canvas_Image = controller.canvas_Image
+        self.canvas_Sample = controller.canvas_Sample
+        self.data_SHAPE = controller.data_SHAPE
+        self.Data_Functions = controller.Data_Functions
+
+        self.data_matching=[]
+        # Lấy giá trị trong dataset
+        self.get_data_from_Database()
+
+        # Define thanh kéo
+        self.define_UI()
+        
+    def define_UI(self):
+        """
+        ## Liên kết UI với các sự kiện điều khiển
+        - Description:
+            Gắn các sự kiện (signal) của slider và line edit với hàm `adjust_value`
+            để khi người dùng thay đổi giá trị trên giao diện, dữ liệu được cập nhật tự động.
+        - Connect:
+            - slider_coarse_scale_matching → adjust_value()
+            - slider_limit_score_matching → adjust_value()
+            - edit_max_objects_matching (khi người dùng nhấn Enter hoặc rời khỏi ô) → adjust_value()
+        """
+        self.ui.slider_coarse_scale_matching.valueChanged.connect(self.adjust_value)
+        self.ui.slider_limit_score_matching.valueChanged.connect(self.adjust_value)
+        self.ui.edit_max_objects_matching.editingFinished.connect(self.adjust_value)
+    
+    def adjust_value(self):
+        """
+        ## Cập nhật dữ liệu khi người dùng thay đổi giá trị trên UI
+        - Description:
+            Lấy giá trị hiện tại từ các slider và ô nhập, 
+            lưu vào `self.data_matching`, sau đó:
+            1️⃣ Cập nhật lại hiển thị UI (`update_UI_matching()`)
+            2️⃣ Ghi dữ liệu mới vào database (`update_data_matching_values`)
+        - Process:
+            - coarse_scale và limit_score được nhân / chia 100 để chuẩn hóa về dạng 0.x
+            - max_object được lấy từ ô nhập bằng `check_value_int_line_edit`
+        """
+        self.data_matching[0]=int(self.ui.slider_coarse_scale_matching.value())/100.0
+        self.data_matching[1]=int(self.ui.slider_limit_score_matching.value())/100.0
+        self.data_matching[2]=self.controller.check_value_int_line_edit(self.ui.edit_max_objects_matching)
+
+        self.update_UI_matching()
+
+        self.Data_Functions.update_data_matching_values(0, "Data_matching", self.data_matching)
+        
+    def get_data_from_Database(self):
+        """
+        ## Cập nhật dữ liệu khi người dùng thay đổi giá trị trên UI
+        - Description:
+            Lấy giá trị hiện tại từ các slider và ô nhập, 
+            lưu vào `self.data_matching`, sau đó:
+            1️⃣ Cập nhật lại hiển thị UI (`update_UI_matching()`)
+            2️⃣ Ghi dữ liệu mới vào database (`update_data_matching_values`)
+        - Process:
+            - coarse_scale và limit_score được nhân / chia 100 để chuẩn hóa về dạng 0.x
+            - max_object được lấy từ ô nhập bằng `check_value_int_line_edit`
+        """
+        # Lấy giá trị
+        data_getting= self.Data_Functions.get_data_matching_values(0,"Data_matching")
+        print(data_getting)
+
+        for k, v in data_getting[0].items():
+            if k != 'id':
+                self.data_matching.append(v)
+        print(self.data_matching)
+        
+        self.update_UI_matching()
+
+
+    def update_UI_matching(self):
+        """
+        ## Hiển thị giá trị hiện tại lên UI
+        - Description:
+            Cập nhật các label, slider và ô nhập (line edit) theo dữ liệu trong `self.data_matching`.
+            Dùng nhân 100 để chuyển giá trị 0.x sang dạng phần trăm cho dễ đọc.
+        - UI Updated:
+            - label_coarse_scale_matching
+            - slider_coarse_scale_matching
+            - label_limit_score_matching
+            - slider_limit_score_matching
+            - edit_max_objects_matching
+        """
+        self.ui.label_coarse_scale_matching.setText(f'{int(self.data_matching[0]*100)}')
+        self.ui.slider_coarse_scale_matching.setValue(int(self.data_matching[0]*100))
+
+        self.ui.label_limit_score_matching.setText(f'{int(self.data_matching[1]*100)}')
+        self.ui.slider_limit_score_matching.setValue(int(self.data_matching[1]*100))
+
+        self.ui.edit_max_objects_matching.setText(f'{self.data_matching[2]}')
+
+
+        
+        

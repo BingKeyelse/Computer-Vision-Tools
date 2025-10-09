@@ -209,7 +209,10 @@ class MainWindow(QMainWindow):
 
         self.init_UX_UI()
 
-        # image_ori= cv2.imread(r'src\data\images\image.jpg')
+        if getattr(sys, 'frozen', False):
+            self.current_file_path = sys._MEIPASS
+        else:
+            self.current_file_path = os.path.dirname(os.path.abspath(__file__))
 
         # Tạo canvas và gắn vào QLabel có sẵn trong ui. Chúng nằm đè lên chứ không phải là một
         self.canvas_Camera = Canvas(parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
@@ -245,10 +248,10 @@ class MainWindow(QMainWindow):
         self.Cam_Functions = CameraFunctions(self.ui, self.cameras, self.timer_0, self.canvas_Camera)
 
         # Database
-        self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions)
+        self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions, self.current_file_path)
 
         # Viết chức năng cho từng nút nhấn riêng
-        self.Button_Controller = ButtonController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions)   #Ken add more cam function
+        self.Button_Controller = ButtonController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions,self.Data_Functions)   #Ken add more cam function
         
         # Tạo custom với ListWidget của ListImage và tạo singal với slot (hàm) muốn custom
         self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom

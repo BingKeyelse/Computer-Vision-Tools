@@ -2276,6 +2276,9 @@
                       </item>
                       <item row="2" column="0" colspan="2">
                        <widget class="QSlider" name="slider_coarse_scale_matching">
+                        <property name="maximum">
+                         <number>100</number>
+                        </property>
                         <property name="orientation">
                          <enum>Qt::Horizontal</enum>
                         </property>
@@ -2290,6 +2293,9 @@
                       </item>
                       <item row="4" column="0" colspan="2">
                        <widget class="QSlider" name="slider_limit_score_matching">
+                        <property name="maximum">
+                         <number>100</number>
+                        </property>
                         <property name="orientation">
                          <enum>Qt::Horizontal</enum>
                         </property>

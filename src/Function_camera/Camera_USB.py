@@ -18,7 +18,8 @@ class USBCamera(BaseCamera):
 
     def connect(self):
         """## Kiểm tra kết nối
-        - Nếu đang kết nối, kiểm tra lại bằng cách đọc thử 1 frame"""
+        - Nếu đang kết nối, kiểm tra lại bằng cách đọc thử 1 frame\
+        """
         if self.cap and self.cap.isOpened():
             ret, _ = self.cap.read()
             if ret:
