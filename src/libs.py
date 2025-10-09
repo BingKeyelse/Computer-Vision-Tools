@@ -4,7 +4,7 @@ import os
 import numpy as np
 import math
 from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtCore import Qt, QPoint, QPointF, QTimer
+from PyQt5.QtCore import Qt, QPoint, QPointF, QTimer, QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QBrush, QColor, QPolygon, QPainterPath, QPolygonF
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QApplication, QWidget, QPushButton,\
                             QVBoxLayout, QFileDialog, QMenu, QAction, QApplication, QListWidget, QMessageBox, QComboBox
@@ -97,6 +97,9 @@ class BaseMatcher(ABC):
         """Trả về dict: { 'type': ..., 'box': ..., 'score': ..., 'angle': ... }"""
         pass
 
+# Database
+from Function_data.DataBase_Manager import DatabaseController
+
 from Function_mouse.Box import BoxTool
 from Function_mouse.Circle import CircleTool
 from Function_mouse.OrientedBox import OrientedBoxTool
@@ -117,5 +120,7 @@ from Function_maching.Matching_Circle import CircleMatcher
 from Function_maching.Matching_Polygon import PolygonMatcher
 
 from Function_maching.Matching_Manager import MatcherFactory
+
+
 
 

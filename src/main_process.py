@@ -212,33 +212,21 @@ class MainWindow(QMainWindow):
         # image_ori= cv2.imread(r'src\data\images\image.jpg')
 
         # Tạo canvas và gắn vào QLabel có sẵn trong ui. Chúng nằm đè lên chứ không phải là một
-        self.canvas = Canvas(parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
+        self.canvas_Camera = Canvas(parent=self.ui.screen_main) #  QLabel (Canvas) = Widget: để hiển thị và là nơi thao tác chính
 
-        # How to debug with widget to set fix with label
-        # geometry() Thì lấy theo tọa độ của cha
-        # rect(): Thì lấy theo tọa độ cục bộ
-        # self.canvas.setGeometry(self.ui.screen_main.geometry())  # khớp kích thước với label
-        # self.canvas.setGeometry(self.ui.screen_main.rect())
-        # self.canvas.setStyleSheet("background-color: rgba(255, 0, 0, 100);") 
+        layout_Camera = QVBoxLayout(self.ui.screen_main) # Gắn 1 layout để quản lý toàn bộ thông tin bên trong của label
+        layout_Camera.setContentsMargins(0,0,0,0) # Bỏ hết viền (margin) không sẽ để mặc định là 9
+        layout_Camera.addWidget(self.canvas_Camera) # Bỏ canvas vào nó sẽ chiếm toàn bộ không gian trong label
 
-        # print("screen_main size:", self.ui.screen_main.width(), self.ui.screen_main.height())
-        # print("canvas size:", self.canvas.width(), self.canvas.height())
-        # QTimer.singleShot(100, lambda: print(
-        #     "AFTER SHOW:",
-        #     self.ui.screen_main.width(), self.ui.screen_main.height(),
-        #     self.canvas.width(), self.canvas.height()an
-        # ))
+        # Setup canvas cho Picture - Image
+        self.canvas_Image = Canvas(parent=self.ui.screen_subwindow_1)
+        layout_Image = QVBoxLayout(self.ui.screen_subwindow_1) 
+        layout_Image.setContentsMargins(0,0,0,0) 
+        layout_Image.addWidget(self.canvas_Image)
 
-        layout = QVBoxLayout(self.ui.screen_main) # Gắn 1 layout để quản lý toàn bộ thông tin bên trong của label
-        layout.setContentsMargins(0,0,0,0) # Bỏ hết viền (margin) không sẽ để mặc định là 9
-        layout.addWidget(self.canvas) # Bỏ canvas vào nó sẽ chiếm toàn bộ không gian trong label
-        # QTimer.singleShot(100, lambda: print(
-        #     "AFTER SHOW:",
-        #     self.canvas.scale_paramater
-        # ))
-        
+
         self.tool_manager = ToolManager() # Đạo diễn, người chỉ định dùng tool nào
-        self.canvas.set_tool_manager(self.tool_manager)
+        self.canvas_Image.set_tool_manager(self.tool_manager)
 
         # Chọn tool mặc định là Box
         self.tool_manager.set_tool(BoxTool())
@@ -249,23 +237,30 @@ class MainWindow(QMainWindow):
         layout_Sample.setContentsMargins(0,0,0,0) 
         layout_Sample.addWidget(self.canvas_Sample)
 
-        # Khởi tạo timer dùng cho quản lý Camera 
-        self.timer_0 = QTimer() 
+        # Database
+        
+        self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions)
 
-        # Khởi tạo kiểu cam và phân loại kết nối phù hợp usb hay basler
+
+        
+
+        # Khởi tạo kiểu Cam và phân loại kết nối phù hợp USB hay Basler
+        self.timer_0 = QTimer() # Khởi tạo timer dùng cho quản lý Camera 
         self.initial_cam = CreateNameCamera() 
         self.cameras = self.initial_cam.cameras 
-        self.cam_function = CameraFunctions(self.ui, self.cameras, self.timer_0, self.canvas) #Ken
+
+        self.Cam_Functions = CameraFunctions(self.ui, self.cameras, self.timer_0, self.canvas_Camera)
+
         # Viết chức năng cho từng nút nhấn riêng
-        self.button_controller = ButtonController(self.ui, self.tool_manager, self.canvas, self.canvas_Sample, self.cam_function)   #Ken add more cam function
+        self.Button_Controller = ButtonController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions)   #Ken add more cam function
         
         # Tạo custom với ListWidget của ListImage và tạo singal với slot (hàm) muốn custom
         self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom
         self.ui.list_image.customContextMenuRequested.connect(        # Tạo signal kết nối với slot chỉ định 
-        lambda pos: self.button_controller.show_list_menu(pos)      # auto có pos để truyền vô slot đó
+        lambda pos: self.Button_Controller.show_list_menu(pos)      # auto có pos để truyền vô slot đó
         )
         self.ui.list_image.itemDoubleClicked.connect( # Double-Click thì chọn luôn nhé
-            lambda: self.button_controller.choose_selected_item()
+            lambda: self.Button_Controller.choose_selected_item()
         )
     
     def init_UX_UI(self)-> None:

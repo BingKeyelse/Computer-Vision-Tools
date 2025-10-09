@@ -7,7 +7,7 @@ class ButtonController:
         """
         self.ui = ui
         self.tool_manager= tool_manager
-        self.canvas= canvas
+        self.canvas_Image= canvas
         self.canvas_Sample= canvas_Sample
 
         self.camera_function = cam_function
@@ -32,13 +32,16 @@ class ButtonController:
         self.sample_button = Sample_button(self)
 
         self.ui.btn_shape.currentTextChanged.connect(self.change_tool) # Singal tự gửi được Toolname của QListWidget
-        self.ui.btn_cut.clicked.connect(lambda: (self.get_shape_and_update(), self.canvas.update()))
-        self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.clear(), self.canvas.update()))
-        self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
-        self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.undo(), self.canvas.update()))
-        self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
-        self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas.update()))
-        self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas.update()))
+        self.ui.btn_cut.clicked.connect(lambda: (self.get_shape_and_update(), self.canvas_Image.update()))
+        self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.clear(), self.canvas_Image.update()))
+        self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas_Image.update()))
+        self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.undo(), self.canvas_Image.update()))
+        self.ui.btn_undo.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas_Image.update()))
+        self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas_Image.update()))
+        self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas_Image.update()))
+
+        # Button cho phần chuyển màn của Camera và Image
+        self.ui.btn_check_cam
 
     def get_shape_and_update(self):
         """
@@ -83,7 +86,7 @@ class ButtonController:
 
         # Nếu bạn đang có canvas để hiển thị thì update luôn
         if hasattr(self, "canvas"):
-            self.canvas.set_image(resized, self.file_path, scale)
+            self.canvas_Image.set_image(resized, self.file_path, scale)
         
     def change_tool(self, tool_name)-> None:
         """
@@ -211,7 +214,7 @@ class ButtonController:
         ## Chọn ảnh để hiển thị với action - ListWidget 
         - Đưa phần resize về 100%, clear toàn bộ data mà Tool Manager đang vẽ và đang được cut ra rồi
         - Khi đường link hay ảnh được chọn thì cho opencv đọc và đưa nó vào canvas cập nhập giao diện
-        - Truy cập vào hàm self.canvas.set_image truyền 2 đối số (ảnh resize, link gốc)
+        - Truy cập vào hàm self.canvas_Image.set_image truyền 2 đối số (ảnh resize, link gốc)
         để cập nhập ảnh vào canvas
         """
         self.ui.btn_resize.setCurrentIndex(0)
@@ -234,9 +237,10 @@ class ButtonController:
         if self.image is None:
             # print(f"Không thể đọc ảnh: {self.file_path}")
             return
+        self.ui.stackwidget.setCurrentWidget(self.ui.page_sub_1)
 
         # Gán ảnh mới vào canvas
-        self.canvas.set_image(self.image, self.file_path)  
+        self.canvas_Image.set_image(self.image, self.file_path)  
 
     def get_information_image(self, image):
         """## Dùng để lấy thông tin kích thước của ảnh"""
@@ -261,7 +265,7 @@ class Sample_button:
         self.controller= controller
         self.ui= controller.ui
         self.tool_manager = controller.tool_manager
-        self.canvas = controller.canvas
+        self.canvas_Image = controller.canvas_Image
         self.canvas_Sample = controller.canvas_Sample
         self.data_SHAPE = controller.data_SHAPE
 
@@ -322,7 +326,7 @@ class Sample_button:
             # self.tool_manager.remove_SHAPE(idx-1)
             self.control_stick_Sample()
             self.show_Sample()
-            self.canvas.update()
+            self.canvas_Image.update()
     
     def undo_Sample(self)-> None:
         """
@@ -331,7 +335,7 @@ class Sample_button:
         if len(self.data_SHAPE)>0:
             self.data_SHAPE.pop()
             self.show_Sample()
-            self.canvas.update()
+            self.canvas_Image.update()
     
     def clear_Sample(self)-> None:
         """
@@ -340,7 +344,7 @@ class Sample_button:
         
         self.data_SHAPE=[]
         self.show_Sample()
-        self.canvas.update()
+        self.canvas_Image.update()
             
     def show_Sample(self)-> None:
         """

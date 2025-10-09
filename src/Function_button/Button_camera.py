@@ -1,5 +1,28 @@
 from libs import*
 
+class CameraChecker(QThread):
+    finished = pyqtSignal(list)
+
+    def __init__(self, cameras):
+        """
+        ## Scan camera đang có
+        - Args:
+            - cameras: truyền vào thông tin camera được khai báo để quét
+        """
+        super().__init__()
+        self.cameras = cameras
+
+    def run(self):
+        """
+        ## Emit data những cam được quét để trở về hàm kết nối
+        """
+        available = []
+        for name, cam in self.cameras.items():
+            cam.connect()
+            if cam.connected:
+                available.append(name)
+        self.finished.emit(available)  # gửi lại kết quả
+
 class CameraFunctions:
     def __init__(self, ui, cameras, timer_0, canvas):
         """
@@ -26,35 +49,48 @@ class CameraFunctions:
         self.ui.btn_choose_cam.addItem("None")
         self.ui.btn_choose_cam.currentTextChanged.connect(self.select_camera)
         self.timer_0.timeout.connect(self.update_frame)
+    
+    def check_cameras(self):
+        """
+        ## Kiểm tra xem có camera nào đang được mở không
+        - Kết nới với một thread để check camera
+        - Emit singal đến hàm self._on_check_done để cập nhập giao diện
+        """
+        self.ui.btn_check_cam.setText("🔄Checking...")
 
-    def check_cameras(self)-> None:
+        self.thread = CameraChecker(self.cameras)
+        self.thread.finished.connect(self._on_check_done)
+        self.thread.start()  # ✅ start mà không block UI
+    
+    def _on_check_done(self, available):
         """
-        ## Kiểm tra camera check xem cái nào đang có
+        ## Sau khi check cam xong thì điều chỉnh giao diện
+        - Đoạn này có check thông tin xem có đang mở cái cam được chọn không đó ấy nhé
+        - Inputs:
+            - available: là thông tin cam nhận được từ Thread Scan Camera - singal
         """
-        # 🚫 Tạm chặn signal để tránh gọi select_camera('') khi clear
+        # ✅ Tương tự như sau khi join — bạn xử lý ở đây
         self.ui.btn_choose_cam.blockSignals(True)
         self.ui.btn_choose_cam.clear()
         self.ui.btn_choose_cam.addItem("None")
+        self.ui.btn_check_cam.setText("Check Cam")
 
-        available = []
-        for name, cam in self.cameras.items():
-            cam.connect() # Cho chúng nó kết nối hết luôn đi
-            if cam.connected:
-                self.ui.btn_choose_cam.addItem(name)
-                available.append(name)
-
-        # Nếu camera đang active vẫn còn trong danh sách thì giữ nguyên
+        for name in available:
+            self.ui.btn_choose_cam.addItem(name)
+        
         if self.active_name and self.active_name in available:
             self.ui.btn_choose_cam.setCurrentText(self.active_name)
         else:
-            # Nếu active không còn thì reset
             self.active_cam = None
             self.active_name = None
             self.ui.btn_choose_cam.setCurrentText("None")
-            # self.label.setText("No Camera")
             self.timer_0.stop()
 
+        
+        self.ui.stackwidget.setCurrentWidget(self.ui.page_main)
         self.ui.btn_choose_cam.blockSignals(False)
+        self.thread.quit()
+        self.thread.wait()  # tương đương join nhưng không block UI
 
     def select_camera(self, name) -> None:
         """
@@ -73,7 +109,7 @@ class CameraFunctions:
 
         if name not in self.cameras:
             return
-
+        
         cam = self.cameras[name] # Lấy toàn bộ đối tượng ra luôn
         if not cam.connected:
             # QMessageBox.warning(self, "Warning", f"{name} chưa được kết nối! Hãy bấm 'Check All Cameras' trước.")
