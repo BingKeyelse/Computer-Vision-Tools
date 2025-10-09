@@ -237,19 +237,15 @@ class MainWindow(QMainWindow):
         layout_Sample.setContentsMargins(0,0,0,0) 
         layout_Sample.addWidget(self.canvas_Sample)
 
-        # Database
-        
-        self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions)
-
-
-        
-
         # Khởi tạo kiểu Cam và phân loại kết nối phù hợp USB hay Basler
         self.timer_0 = QTimer() # Khởi tạo timer dùng cho quản lý Camera 
         self.initial_cam = CreateNameCamera() 
         self.cameras = self.initial_cam.cameras 
 
         self.Cam_Functions = CameraFunctions(self.ui, self.cameras, self.timer_0, self.canvas_Camera)
+
+        # Database
+        self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions)
 
         # Viết chức năng cho từng nút nhấn riêng
         self.Button_Controller = ButtonController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions)   #Ken add more cam function
