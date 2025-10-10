@@ -1053,7 +1053,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QPushButton" name="pushButton_17">
+                 <widget class="QPushButton" name="btn_matching_process">
                   <property name="text">
                    <string>MATCHING</string>
                   </property>
@@ -2125,7 +2125,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QStackedWidget" name="stackedWidget_7">
+              <widget class="QStackedWidget" name="stackedWidget_processing">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>
@@ -2197,7 +2197,7 @@
                  </item>
                 </layout>
                </widget>
-               <widget class="QWidget" name="page">
+               <widget class="QWidget" name="page_matching">
                 <layout class="QGridLayout" name="gridLayout_11">
                  <item row="0" column="0">
                   <layout class="QGridLayout" name="gridLayout_20" rowstretch="1,15,2">

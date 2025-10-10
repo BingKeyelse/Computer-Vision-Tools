@@ -65,6 +65,7 @@ def test_oriented_box(data_list):
         # Vẽ vùng oriented box sau xoay
         vis = rotated.copy()
         cv2.polylines(vis, [box_rotated], isClosed=True, color=(0, 255, 0), thickness=2)
+        vis= cv2.resize(vis, (0,0), fx= 0.5, fy=0.5)
         cv2.imshow("Rotated Scene", vis)
         cv2.imshow("Aligned Crop", cropped)
         cv2.waitKey(0)

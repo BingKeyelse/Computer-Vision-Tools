@@ -63,7 +63,7 @@ class DatabaseController:
             # Lưu kết nối
             self.db_connections[db_name] = conn
     
-    def get_data_matching_values(self, idx, table_name)-> list:
+    def get_data_matching_values(self, idx: int, table_name: str)-> list:
         """
         Lấy toàn bộ dữ liệu từ bảng được chỉ định.
 

@@ -1,7 +1,7 @@
 from libs import*
 
 class ButtonController:
-    def __init__(self, ui, tool_manager, canvas, canvas_Sample, cam_function, data_functions):
+    def __init__(self, ui, tool_manager, canvas, canvas_Sample, cam_function, data_functions, Matching_Controller):
         """
         Chứa tất cả các hàm liên quan đến Button
         """
@@ -12,10 +12,13 @@ class ButtonController:
 
         self.camera_function = cam_function
         self.Data_Functions= data_functions
+        self.Matching_Controller = Matching_Controller
 
         # Function Camera
         self.image=None
         self.file_path=None
+        self.scale= 1
+        self.image_resized= None
         self.ui.btn_resize.currentTextChanged.connect(self.resize_image) 
 
         # Function ToolBar
@@ -32,6 +35,9 @@ class ButtonController:
         # Tạo Sample_button, truyền chính self (instance ButtonController)
         self.sample_button = Sample_button(self)
 
+        # Tạo Matching button, truyền chính self ( instance ButtonController)
+        self.matching_button = Matching_button(self)
+
         self.ui.btn_shape.currentTextChanged.connect(self.change_tool) # Singal tự gửi được Toolname của QListWidget
         self.ui.btn_cut.clicked.connect(lambda: (self.get_shape_and_update(), self.canvas_Image.update()))
         self.ui.btn_clear.clicked.connect(lambda: (self.tool_manager.clear(), self.canvas_Image.update()))
@@ -41,10 +47,6 @@ class ButtonController:
         self.ui.btn_polyundo.clicked.connect(lambda: (self.tool_manager.undo_polygon(), self.canvas_Image.update()))
         self.ui.btn_new.clicked.connect(lambda: (self.tool_manager.reset(), self.canvas_Image.update()))
 
-        # Tạo Matching button, truyền chính self ( instance ButtonController)
-        self.sample_button = Matching_button(self)
-
-
     def get_shape_and_update(self):
         """
         ## Cập nhập data shape và update Shape bar
@@ -53,6 +55,8 @@ class ButtonController:
         """
         if len(self.data_SHAPE)<12:
             self.data_SHAPE= self.tool_manager.cut(self.data_SHAPE)
+            print("=============================")
+            print(len(self.data_SHAPE))
             print(self.data_SHAPE)
             self.sample_button.show_Sample()
 
@@ -67,14 +71,14 @@ class ButtonController:
         # self.tool_manager.clear()
         # self.tool_manager.reset()
 
-        scale= int(size_text)/100
+        self.scale= int(size_text)/100
 
         if self.image is None:
             return None
     
         h, w = self.image.shape[:2]
-        new_w = int(w * scale)
-        new_h = int(h * scale)
+        new_w = int(w * self.scale)
+        new_h = int(h * self.scale)
 
         if new_w <= 0 or new_h <= 0:
             return None  # Tránh resize về 0
@@ -88,7 +92,7 @@ class ButtonController:
 
         # Nếu bạn đang có canvas để hiển thị thì update luôn
         if hasattr(self, "canvas"):
-            self.canvas_Image.set_image(resized, self.file_path, scale)
+            self.canvas_Image.set_image(resized, self.file_path, self.scale)
         
     def change_tool(self, tool_name)-> None:
         """
@@ -234,6 +238,7 @@ class ButtonController:
             
         self.file_path = item.text()  # đường dẫn ảnh
         self.image = cv2.imread(self.file_path)
+        self.image_resized = self.image
         self.get_information_image(self.image)
 
         if self.image is None:
@@ -297,7 +302,7 @@ class Sample_button:
         self.tool_manager = controller.tool_manager
         self.canvas_Image = controller.canvas_Image
         self.canvas_Sample = controller.canvas_Sample
-        self.data_SHAPE = controller.data_SHAPE
+        # self.data_SHAPE = self.controller.data_SHAPE
         self.Data_Functions = controller.Data_Functions
 
         # Setup click with stick Sample
@@ -311,6 +316,7 @@ class Sample_button:
             btn_sample = getattr(self.ui, f"btn_sample_{i}", None)
             if btn_sample:
                 btn_sample.clicked.connect(lambda _, idx=i: self.show_image_Sample(idx))
+             
 
         # Setup click with delete Sample
         for i in range(1, 12):
@@ -327,16 +333,16 @@ class Sample_button:
         if idx is None:
             return
         # Lấy giá trị mode phù hợp với idx
-        mode = self.data_SHAPE[idx-1]['mode']
+        mode = self.controller.data_SHAPE[idx-1]['mode']
         # Toggle mode
-        self.data_SHAPE[idx-1]['mode'] = 1 if mode == 0 else 0
+        self.controller.data_SHAPE[idx-1]['mode'] = 1 if mode == 0 else 0
         self.control_stick_Sample()
     
     def control_stick_Sample(self):
         """
         ## Bộ kiểm soát stick hiển thị chọn hay không được chọn
         """
-        for idx, data in enumerate(self.data_SHAPE):
+        for idx, data in enumerate(self.controller.data_SHAPE):
             btn_stick = getattr(self.ui, f"btn_stick_{idx+1}", None)
             if not btn_stick:
                 continue
@@ -353,7 +359,7 @@ class Sample_button:
             - idx: thứ tự xóa theo nút nhấn trên Sample bar
         """
         if idx is not None:
-            self.data_SHAPE.pop(idx-1)
+            self.controller.data_SHAPE.pop(idx-1)
             # self.tool_manager.remove_SHAPE(idx-1)
             self.control_stick_Sample()
             self.show_Sample()
@@ -363,8 +369,8 @@ class Sample_button:
         """
         ## Lệnh này tương tác undo với nút undo bên Tool Shape
         """
-        if len(self.data_SHAPE)>0:
-            self.data_SHAPE.pop()
+        if len(self.controller.data_SHAPE)>0:
+            self.controller.data_SHAPE.pop()
             self.show_Sample()
             self.canvas_Image.update()
     
@@ -373,7 +379,7 @@ class Sample_button:
         ## Lệnh này là để tương tác với clear bên Tool Shape
         """
         
-        self.data_SHAPE=[]
+        self.controller.data_SHAPE=[]
         self.show_Sample()
         self.canvas_Image.update()
             
@@ -381,7 +387,7 @@ class Sample_button:
         """
         ## Hiện thị nút nhấn bên Sample Tool
         """
-        leng= len(self.data_SHAPE)
+        leng= len(self.controller.data_SHAPE)
         self.hide_Sample() # Reset Sample Tool
 
         for i in range(1,leng+1):  # từ 1 -> 11
@@ -395,6 +401,8 @@ class Sample_button:
                 btn_stick.setVisible(True)   # hoặc btn_stick.hide()
             if btn_delete:
                 btn_delete.show()
+                
+        self.control_stick_Sample()
     
     def hide_Sample(self)-> None:
         """
@@ -419,8 +427,10 @@ class Sample_button:
         - Đọc link ảnh cho vào crop shape để lấy định dạng 100%
         - Ảnh sẽ được đưa cho canvas Sample để nó hiện thị  
         """
-        link = self.data_SHAPE[idx-1]['link']
-        shape = self.data_SHAPE[idx-1]['data']
+        # Show StackWidget
+        self.ui.stackedWidget_processing.setCurrentWidget(self.ui.page_detail_sample)
+        link = self.controller.data_SHAPE[idx-1]['link']
+        shape = self.controller.data_SHAPE[idx-1]['data']
 
         # Lấy ảnh crop từ tool_manager
         image = self.tool_manager.crop_shape(link, shape)
@@ -431,6 +441,18 @@ class Sample_button:
 
         # Truyền cv2 image vào canvas
         self.canvas_Sample.set_image(image, link)
+
+def rotate_image_keep_all(img, angle, borderValue=(255, 255, 255)):
+    """Rotate image around center but keep full content (expanded canvas)."""
+    (h, w) = img.shape[:2]
+    angle_rad = np.deg2rad(angle)
+    cos, sin = abs(np.cos(angle_rad)), abs(np.sin(angle_rad))
+    new_w = int(h * sin + w * cos)
+    new_h = int(h * cos + w * sin)
+    M = cv2.getRotationMatrix2D((w / 2, h / 2), angle, 1.0)
+    M[0, 2] += (new_w - w) / 2
+    M[1, 2] += (new_h - h) / 2
+    return M, (new_w, new_h)
 
 class Matching_button:
     """
@@ -453,8 +475,14 @@ class Matching_button:
         self.tool_manager = controller.tool_manager
         self.canvas_Image = controller.canvas_Image
         self.canvas_Sample = controller.canvas_Sample
-        self.data_SHAPE = controller.data_SHAPE
+        # self.data_SHAPE = controller.data_SHAPE
+        # self.scale = controller.scale
+        # self.image_resized = controller.image_resized
         self.Data_Functions = controller.Data_Functions
+        self.Matching_Controller = controller.Matching_Controller
+
+        self.ui.btn_matching_process.clicked.connect(lambda: self.ui.stackedWidget_processing.setCurrentWidget(self.ui.page_matching))
+        self.ui.btn_run_matching.clicked.connect(self.matching_processing)
 
         self.data_matching=[]
         # Lấy giá trị trong dataset
@@ -462,6 +490,8 @@ class Matching_button:
 
         # Define thanh kéo
         self.define_UI()
+
+        
         
     def define_UI(self):
         """
@@ -521,7 +551,6 @@ class Matching_button:
         
         self.update_UI_matching()
 
-
     def update_UI_matching(self):
         """
         ## Hiển thị giá trị hiện tại lên UI
@@ -542,6 +571,156 @@ class Matching_button:
         self.ui.slider_limit_score_matching.setValue(int(self.data_matching[1]*100))
 
         self.ui.edit_max_objects_matching.setText(f'{self.data_matching[2]}')
+
+    def matching_processing(self):
+        mode_NMS=1
+        if self.controller.image_resized is not None:
+            gray = cv2.cvtColor(self.controller.image_resized, cv2.COLOR_BGR2GRAY)
+            draw_img = self.controller.image_resized.copy()
+            res_data=[]
+            template_list=[]
+
+            for data in self.controller.data_SHAPE:
+                if data['mode'] ==1: # Chỉ chấp nhận mode 1 mới cho kích hoạt chạy
+                    matcher = self.Matching_Controller.create(data, self.controller.scale)
+                    template= matcher.load_template()
+                    res = matcher.match(scene = gray, 
+                                        coarse_scale= self.data_matching[0],
+                                        threshold= self.data_matching[1],
+                                        max_objects= self.data_matching[2])
+                    res_data.extend([
+                                    {
+                                        **r,
+                                        "template_shape": template.shape[:2],
+                                        "template_angle": data.get("angle", 0),
+                                        "template_name": data.get("name", "unknown")
+                                    }
+                                    for r in res
+                                ])
+                    
+                    if mode_NMS==0:
+                        print('Run not NMS')
+                        if res:
+                            # draw_img = self.controller.image_resized.copy()
+                            gray = cv2.cvtColor(draw_img, cv2.COLOR_BGR2GRAY)
+
+                            # Lấy template thực tế từ matcher để biết kích thước
+                            template = matcher.template
+                            h_t, w_t = template.shape[:2]  # Kích thước template
+
+                            for r in res:
+                                x1, y1, x2, y2 = r["box"]
+                                angle = r["angle"]
+                                score = r["score"]
+
+                                # --- Tính lại vị trí polygon thật của template ---
+                                M_rot, (new_w, new_h) = rotate_image_keep_all(template, angle)
+
+                                # 4 góc template gốc
+                                corners_t = np.array([
+                                    [0, 0],
+                                    [w_t, 0],
+                                    [w_t, h_t],
+                                    [0, h_t]
+                                ], dtype=np.float32)
+
+                                ones = np.ones((4, 1), dtype=np.float32)
+                                corners_h = np.hstack([corners_t, ones])
+                                rotated_t = (M_rot @ corners_h.T).T
+
+                                # Offset dịch polygon về vị trí match
+                                offset_x = rotated_t[:, 0].min()
+                                offset_y = rotated_t[:, 1].min()
+                                rotated_in_scene = rotated_t - [offset_x, offset_y] + [x1, y1]
+                                rotated_in_scene = rotated_in_scene.astype(np.int32)
+
+                                # --- Vẽ polygon xoay ---
+                                cv2.polylines(draw_img, [rotated_in_scene], isClosed=True, color=(0, 255, 0), thickness=2)
+
+                                # Tâm trung bình để ghi chữ
+                                cx, cy = np.mean(rotated_in_scene, axis=0).astype(int)
+                                cv2.putText(draw_img, f"angle: {angle:.1f}° | score: {score:.2f}",
+                                            (int(cx), int(cy) - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                                            0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            
+            print(res_data)
+            if mode_NMS == 1:
+                print('Run NMS')
+
+                # --- 1. Kiểm tra dữ liệu ---
+                if len(res_data) == 0:
+                    print("❌ Không có kết quả nào từ tất cả matcher.")
+                    return
+
+                # --- 2. Chuẩn bị dữ liệu cho NMS ---
+                boxes_xywh = []
+                for r in res_data:
+                    x1, y1, x2, y2 = r["box"]
+                    boxes_xywh.append([x1, y1, x2 - x1, y2 - y1])
+
+                scores = [r["score"] for r in res_data]
+
+                # --- 3. Thực hiện NMS ---
+                keep = cv2.dnn.NMSBoxes(
+                    bboxes=boxes_xywh,
+                    scores=scores,
+                    score_threshold=self.data_matching[1],  # threshold
+                    nms_threshold=0.3                       # mức chồng lấn cho phép
+                )
+
+                if len(keep) == 0:
+                    print("❌ Không còn box nào sau NMS.")
+                    return
+
+                # --- 4. Lấy danh sách giữ lại ---
+                keep = keep.flatten()
+                filtered_results = [res_data[i] for i in keep]
+
+                print(f"✅ Giữ lại {len(filtered_results)} box sau NMS")
+
+                # --- 5. Vẽ kết quả ---
+                for r in filtered_results:
+                    x1, y1, x2, y2 = r["box"]
+                    angle = r["angle"]
+                    score = r["score"]
+
+                    # Lấy kích thước template gốc
+                    h_t, w_t = r["template_shape"]
+                    name = r.get("template_name", "unknown")
+
+                    # Xoay template ảo để dựng polygon đúng góc
+                    dummy_template = np.zeros((h_t, w_t), dtype=np.uint8)
+                    M_rot, (new_w, new_h) = rotate_image_keep_all(dummy_template, angle)
+
+                    corners_t = np.array([
+                        [0, 0],
+                        [w_t, 0],
+                        [w_t, h_t],
+                        [0, h_t]
+                    ], dtype=np.float32)
+                    ones = np.ones((4, 1), dtype=np.float32)
+                    corners_h = np.hstack([corners_t, ones])
+                    rotated_t = (M_rot @ corners_h.T).T
+
+                    offset_x = rotated_t[:, 0].min()
+                    offset_y = rotated_t[:, 1].min()
+                    rotated_in_scene = rotated_t - [offset_x, offset_y] + [x1, y1]
+                    rotated_in_scene = rotated_in_scene.astype(np.int32)
+
+                    # Vẽ polygon xoay
+                    cv2.polylines(draw_img, [rotated_in_scene], isClosed=True, color=(0, 255, 0), thickness=2)
+                    cx, cy = np.mean(rotated_in_scene, axis=0).astype(int)
+                    cv2.putText(draw_img, f"{name} | {score:.2f} | {angle:.1f}°",
+                                (cx, cy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+            # --- 4. Hiển thị ---
+            cv2.imshow("Filtered Matching", draw_img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+        else: 
+            print('none data')
+            print(self.controller.scale)
+                
 
 
         

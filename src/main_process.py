@@ -247,11 +247,18 @@ class MainWindow(QMainWindow):
 
         self.Cam_Functions = CameraFunctions(self.ui, self.cameras, self.timer_0, self.canvas_Camera)
 
+        # Tạo Matching Manager để kiểm soát
+        self.Matching_Controller= MatcherFactory()
+
         # Database
-        self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions, self.current_file_path)
+        self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, 
+                                                self.canvas_Sample, self.Cam_Functions, 
+                                                self.current_file_path)
 
         # Viết chức năng cho từng nút nhấn riêng
-        self.Button_Controller = ButtonController(self.ui, self.tool_manager, self.canvas_Image, self.canvas_Sample, self.Cam_Functions,self.Data_Functions)   #Ken add more cam function
+        self.Button_Controller = ButtonController(self.ui, self.tool_manager, self.canvas_Image, 
+                                                  self.canvas_Sample, self.Cam_Functions, 
+                                                  self.Data_Functions, self.Matching_Controller)   
         
         # Tạo custom với ListWidget của ListImage và tạo singal với slot (hàm) muốn custom
         self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom
@@ -261,7 +268,7 @@ class MainWindow(QMainWindow):
         self.ui.list_image.itemDoubleClicked.connect( # Double-Click thì chọn luôn nhé
             lambda: self.Button_Controller.choose_selected_item()
         )
-    
+
     def init_UX_UI(self)-> None:
         """
         Dùng để setup toàn bộ khởi tạo liên quan tới UX-UI

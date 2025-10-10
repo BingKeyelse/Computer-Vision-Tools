@@ -82,15 +82,23 @@ class BaseCamera(ABC):
             self.cap = None
         self.connected = False
 
-# ==== Base Matcher cho tất cả tools ====
+# ==== Base Matcher cho tất cả Tools Matching ====
 class BaseMatcher(ABC):
-    def __init__(self, image_path, data):
-        self.image_path = image_path
+    def __init__(self, temple_path: str, data: tuple, scale: float):
+        """
+        ## Base Matcher cho tất cả Tools Matching
+        - Args:
+            - image_path: link ảnh
+            - data: dữ liệu truyền vào
+        """
+        self.temple_path = temple_path
         self.data = data  # có thể là box, circle, polygon...
+        self.scale = scale
         self.template = None
 
     @abstractmethod
     def load_template(self):
+        """## Load ảnh temple để matching với ảnh gốc"""
         pass
 
     @abstractmethod
@@ -117,6 +125,7 @@ from Function_camera.Camera_Manager import CreateNameCamera
 
 # Matching
 from Function_maching.Matching_Box import BoxMatcher
+from Function_maching.Matching_OrientedBox import OrientedBoxMatcher
 from Function_maching.Matching_Circle import CircleMatcher
 from Function_maching.Matching_Polygon import PolygonMatcher
 

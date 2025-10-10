@@ -12,16 +12,78 @@ def rotate_image_keep_all(img, angle, borderValue=(255, 255, 255)):
     M[1, 2] += (new_h - h) / 2
     return M, (new_w, new_h)
 
+def extract_oriented_object(img, start, end, angle_rad):
+    """
+    Chuẩn hóa vùng oriented box về phương nằm ngang.
+    - start, end: 2 điểm đối diện nhau (đường chéo)
+    - angle_rad: góc nghiêng (radian)
+    """
+    # Chuyển góc sang độ
+    angle_deg = np.degrees(angle_rad)
 
-class BoxMatcher(BaseMatcher):  
+    # Tâm và kích thước box
+    cx, cy = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
+    w = abs(end[0] - start[0])
+    h = abs(end[1] - start[1])
+
+    # Tạo rotated rect (giống cv2.minAreaRect)
+    rect = ((cx, cy), (w, h), angle_deg)
+
+    # Lấy 4 điểm polygon từ rect (theo hướng nghiêng)
+    box = cv2.boxPoints(rect).astype(np.float32)
+
+    # --- Tạo ma trận xoay để "dựng thẳng" box ---
+    M = cv2.getRotationMatrix2D((cx, cy), angle_deg, 1.0)
+    cos = np.abs(M[0, 0])
+    sin = np.abs(M[0, 1])
+
+    # Tính kích thước mới sau khi xoay toàn ảnh
+    h_img, w_img = img.shape[:2]
+    new_w = int(h_img * sin + w_img * cos)
+    new_h = int(h_img * cos + w_img * sin)
+
+    # Cập nhật offset để không bị crop ngoài
+    M[0, 2] += (new_w / 2) - cx
+    M[1, 2] += (new_h / 2) - cy
+
+    # Xoay toàn ảnh để đối tượng về thẳng
+    rotated = cv2.warpAffine(img, M, (new_w, new_h), flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255))
+
+    # Chuyển box điểm sang không gian mới (sau khi xoay)
+    ones = np.ones((4, 1), dtype=np.float32)
+    box_h = np.hstack([box, ones])
+    box_rotated = (M @ box_h.T).T
+
+    # Crop vùng bounding box mới
+    x_min, y_min = box_rotated[:, 0].min(), box_rotated[:, 1].min()
+    x_max, y_max = box_rotated[:, 0].max(), box_rotated[:, 1].max()
+
+    cropped = rotated[int(y_min):int(y_max), int(x_min):int(x_max)]
+    return cropped, rotated, box_rotated.astype(np.int32)
+
+
+class OrientedBoxMatcher(BaseMatcher):  
     def __init__(self, temple_path, data, scale):
         super().__init__(temple_path, data, scale)
         self.template = None
 
     def load_template(self):
-        _, (x1, y1), (x2, y2) = self.data
+        _, (x1, y1), (x2, y2), angle = self.data
         img = cv2.imread(self.temple_path, cv2.IMREAD_GRAYSCALE)
-        self.template = img[int(y1):int(y2), int(x1):int(x2)]
+
+        self.template, rotated, box_rotated = extract_oriented_object(img, (x1, y1), (x2, y2), angle)
+
+        ## Test
+        # Vẽ vùng oriented box sau xoay
+        # Vẽ vùng oriented box sau xoay
+        # vis = rotated.copy()
+        # cv2.polylines(vis, [box_rotated], isClosed=True, color=(0, 255, 0), thickness=2)
+        # vis= cv2.resize(vis, (0,0), fx= 0.5, fy=0.5)
+        # cv2.imshow("Rotated Scene", vis)
+        # cv2.imshow("Aligned Crop", self.template)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        #
         self.template = cv2.resize(self.template, (0,0), fx= self.scale, fy= self.scale)
         return self.template
 
@@ -30,7 +92,7 @@ class BoxMatcher(BaseMatcher):
               coarse_step=10,
               refine_step=2,
               threshold=0.7,
-              max_candidates=10,
+              max_candidates=15,
               max_objects=5,
               pad=20):
         """
@@ -45,9 +107,17 @@ class BoxMatcher(BaseMatcher):
         print("🌀 [COARSE] scanning...")
         small_scene = cv2.resize(scene, (0, 0), fx=coarse_scale, fy=coarse_scale)
         small_template = cv2.resize(template, (0, 0), fx=coarse_scale, fy=coarse_scale)
+        
+        # small_scene = cv2.GaussianBlur(small_scene, (3, 3), 0)
+        # small_template = cv2.GaussianBlur(small_template, (3, 3), 0)
 
-        small_scene = cv2.GaussianBlur(small_scene, (3, 3), 0)
-        small_template = cv2.GaussianBlur(small_template, (3, 3), 0)
+        # 2. Làm mượt để giảm vùng biên trắng
+        small_scene = cv2.bilateralFilter(small_scene, 5, 50, 50)
+        small_template = cv2.bilateralFilter(small_template, 5, 50, 50)
+
+        # 3. Cân sáng
+        small_scene = cv2.equalizeHist(small_scene)
+        small_template = cv2.equalizeHist(small_template)
 
         angles = np.arange(0, 360, coarse_step)
         all_boxes, all_scores, all_angles = [], [], []
@@ -108,7 +178,7 @@ class BoxMatcher(BaseMatcher):
                 if rotated_t.shape[0] > roi.shape[0] or rotated_t.shape[1] > roi.shape[1]:
                     continue
 
-                res = cv2.matchTemplate(roi, rotated_t, cv2.TM_CCOEFF_NORMED)
+                res = cv2.matchTemplate(roi, rotated_t, cv2.TM_CCOEFF_NORMED) 
                 _, max_val, _, max_loc = cv2.minMaxLoc(res)
                 if max_val < threshold:
                     continue
