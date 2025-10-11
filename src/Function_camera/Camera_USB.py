@@ -49,7 +49,7 @@ class USBCamera(BaseCamera):
             self.cap.release()
         self.cap = None
 
-    def get_frame(self):
+    def get_frame(self) -> np.ndarray | None:
         """## Lấy frame ảnh"""
         if self.connected and self.cap:
             ret, frame = self.cap.read()

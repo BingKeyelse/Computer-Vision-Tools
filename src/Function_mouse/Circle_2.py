@@ -12,74 +12,22 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         self.start = None
         self.end = None
 
-        # === Thêm chức năng điều chỉnh ===
+        ## Thêm chức năng điều chỉnh
         self.mode = None  # "move", "resize", hoặc None
         self.offset = (0, 0)
         self.start_img= None
         self.end_img= None
 
-        # == Tọa độ của ảnh với size iamge 100% ===
         self.start_img_100= None
         self.end_img_100= None
 
-        # === Tỉ lệnh scale ảnh ==== 
-        self.scale_resize= 1.0 # Mặc định là 100%
+        self.scale_resize= 1.0
 
-        # === Thêm phần xoay ===
-        self.angle = 0.0
-        self.handle_radius = 4      # bán kính handler
-        self.dragging_angle = False # đang kéo xoay hay không
-
-
-
-    # ===== Utility =====
     def reset_image(self)-> None:
         """## Khởi tạo lại giá trị bắt đầu để reset hình đang vẽ"""
         self.start = None
         self.end = None
-        self.angle = 0.0
-        self.dragging_angle = False
 
-    def get_handle_pos(self) -> tuple | None:
-        """Tính vị trí handler (điểm đầu mũi tên) theo góc hiện tại
-        - Output: 
-            - (hx, hy) : tọa độ của điểm handler
-        """
-        if not self.start or not self.end:
-            return None
-        cx, cy = self.start
-        r = self.len_2_point(self.start, self.end)
-        hx = cx + r * np.cos(np.deg2rad(self.angle))
-        hy = cy - r * np.sin(np.deg2rad(self.angle))
-        return (hx, hy)
-
-    def get_handle_pos_virtual(self, start= tuple | None, end= tuple | None, angle= float | None) -> tuple | None:
-        """Tính vị trí handler (điểm đầu mũi tên) theo góc hiện tại
-        - Output: 
-            - (hx, hy) : tọa độ của điểm handler
-        """
-        if not start or not end:
-            return None
-        cx, cy = start
-        r = self.len_2_point(start, end)
-        hx = cx + r * np.cos(np.deg2rad(angle))
-        hy = cy - r * np.sin(np.deg2rad(angle))
-        return (hx, hy)
-
-
-    def len_2_point(self, A: list, B: list)-> float:
-        """## Tính khoảng cách 2 điểm
-        - input
-            - A, B: tọa độ 2 điểm cần tính
-        - output
-            - Khoảng cách 2 điểm
-        """
-
-        len_x= (A[0]-B[0])**2
-        len_y= (A[1]-B[1])**2
-        return np.sqrt(len_x + len_y)
-
-    # ===== Mouse events =====
     def on_mouse_down(self, event)-> None:
         """
         ## Thời điểm khi ấn xuống là xem có gần tâm của hình, hay cạnh nào không
@@ -89,7 +37,7 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         """
 
         if not self.start or not self.end:
-            ## Nếu chưa có hình thì khởi tạo
+            # nếu chưa có hình thì khởi tạo
             self.start = (event.x(), event.y())
             self.end = self.start
             return
@@ -100,19 +48,13 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         r = self.len_2_point(self.start, self.end)
         d = self.len_2_point((x, y), (cx, cy))
 
-        ## Lấy tọa độ điểm Handler
-        hx, hy = self.get_handle_pos() if self.get_handle_pos() else (0, 0)
-
-        if np.hypot(x - hx, y - hy) < 12: # Click gần handler
-            # bấm gần handler → xoay
-            self.mode = "rotate"
-            self.dragging_angle = True
-        elif abs(d) < 10:                 # Click gần tâm
+        if abs(d) < 10:   # click gần tâm
             self.mode = "move"
             self.offset = (x - cx, y - cy)
-        elif abs(d - r) < 10:             # Click gần biên
+        elif abs(d - r) < 10:  # click gần biên
             self.mode = "resize"
-        else:                             # Tạo hình tròn mới
+        else:
+            # coi như bắt đầu vẽ mới (nếu muốn cho phép vẽ lại)
             self.start = (x, y)
             self.end = self.start
             self.mode = None
@@ -130,7 +72,6 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         
         ## Thêm chức năng điều chỉnh 
         x, y = event.x(), event.y()
-        
         if self.mode == "move":
             x1, y1 = self.start
             x2, y2 = self.end
@@ -141,12 +82,6 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         elif self.mode == "resize":
             # end = điểm mới trên biên → bán kính thay đổi
             self.end = (x, y)
-        
-        elif self.mode == "rotate" and self.dragging_angle:
-            # tính góc mới theo chuột
-            x1, y1 = self.start
-            dx, dy = x - x1, y1 - y  # lưu ý trục y ngược
-            self.angle = (np.degrees(np.arctan2(dy, dx)) + 360) % 360
 
         else:
             # vẽ lần đầu
@@ -159,9 +94,7 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         """
 
         self.mode = None
-        self.dragging_angle = False
 
-    # ===== Draw =====
     def draw(self, painter, x_offset=0, y_offset=0, ratio_base_image=0, scale=1.0) -> None:
         """
         ## Vẽ hình tròn với khung đỏ, tâm hình và nền mờ trong suốt.
@@ -194,40 +127,25 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
                 self.end_img_scaled[1] / (ratio_base_image[1]*self.scale_resize))
 
             # Tính bán kính = khoảng cách từ start đến end
-            # r = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
-            r = int(self.len_2_point(self.start, self.end))
+            r = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
 
-            # === Vẽ hình tròn đỏ ===
+            # Vẽ viền đỏ
             pen = QPen(Qt.red, 2)
             painter.setPen(pen)
             painter.setBrush(Qt.NoBrush)
             painter.drawEllipse(x1 - r, y1 - r, 2 * r, 2 * r)
 
-            # === Vẽ tâm vàng ===
+            # Vẽ tâm màu vàng
             pen = QPen(Qt.yellow, 2)
             painter.setPen(pen)
             painter.setBrush(QBrush(Qt.yellow))
             painter.drawEllipse(x1 - 3, y1 - 3, 6, 6)
 
-            # === Lớp phủ trong suốt đỏ ===
+            # Lớp phủ đỏ trong suốt
             brush = QBrush(QColor(255, 0, 0, 50))  # đỏ, alpha=50
             painter.setBrush(brush)
             painter.setPen(Qt.NoPen)  # bỏ viền khi fill
             painter.drawEllipse(x1 - r, y1 - r, 2 * r, 2 * r)
-
-            # === Vẽ hướng và handler ===
-            hx, hy = self.get_handle_pos()
-            hx, hy = int(hx), int(hy)
-
-            painter.setPen(QPen(Qt.green, 2))
-            painter.drawLine(int(x1), int(y1), hx, hy)
-
-            painter.setBrush(QBrush(Qt.green))
-            painter.drawEllipse(QPointF(hx, hy), self.handle_radius, self.handle_radius)
-
-            # === Hiển thị góc ===
-            painter.setPen(QPen(Qt.white))
-            painter.drawText(hx + 10, hy, f"{int(self.angle)}°")
 
             # Reset lại brush/pen để không ảnh hưởng cái vẽ sau
             painter.setBrush(Qt.NoBrush)
@@ -239,7 +157,17 @@ class CircleTool(MouseTool):# Tool hay diễn viễn Circle
         - output : (shape: str, start_100, end_100)
         """
         if self.start_img_100 and self.end_img_100:
-            return ("circle", self.start_img_100, self.end_img_100, self.angle)
+            return ("circle", self.start_img_100, self.end_img_100)
         return None
     
-    
+    def len_2_point(self, A: list, B: list)-> float:
+        """## Tính khoảng cách 2 điểm
+        - input
+            - A, B: tọa độ 2 điểm cần tính
+        - output
+            - Khoảng cách 2 điểm
+        """
+
+        len_x= (A[0]-B[0])**2
+        len_y= (A[1]-B[1])**2
+        return np.sqrt(len_x + len_y)

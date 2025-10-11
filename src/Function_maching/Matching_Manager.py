@@ -1,5 +1,6 @@
 from libs import*
 
+# ================ MatcherFactory ================
 class MatcherFactory:
     """
     ## Controller Tool Matching với box tùy biến
@@ -16,6 +17,19 @@ class MatcherFactory:
 
     @staticmethod
     def create(mode_data, scale):
+        """
+        ## Tạo instance cho class xử lý tương ứng với mode
+        - input
+            - mode_data: dict chứa thông tin để tạo shape matcher
+                - "data": list chứa thông tin shape, phần tử đầu là mode ("box" | "circle" | ...)
+                - "link": đường dẫn ảnh hoặc metadata cần thiết cho class
+            - scale: tỉ lệ scale của ảnh (ví dụ 1.0 = 100%)
+        - output
+            - Instance của class tương ứng (ví dụ BoxMatcher, CircleMatcher, ...)
+        - Lưu ý:
+            - Nếu mode không được đăng ký, sẽ raise lỗi ValueError
+        """
+        
         mode = mode_data["data"][0]   # "box" | "circle" | "polygon" | "oriented"
         cls = MatcherFactory.registry.get(mode)
         if cls:

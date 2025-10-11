@@ -66,6 +66,7 @@ class ToolManager:
 
         if self.active_tool:
             shape = self.active_tool.get_shape()
+            print(shape)
             
             if shape:
                 # Gọi hàm xử lý crop chung
@@ -172,8 +173,7 @@ class ToolManager:
                 painter.fillRect(left, top, width, height, brush)
                 
             elif shape[0] == "circle":
-                _, start, end, idx = shape
-                painter.setPen(QPen(Qt.blue, 2))
+                _, start, end, angle, idx = shape                
                 # x1, y1 = start
                 # x2, y2 = end
 
@@ -192,16 +192,40 @@ class ToolManager:
 
                 # Tính bán kính = khoảng cách từ start đến end
                 r = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
+
+                # === Vẽ hình tròn xanh ===
+                painter.setPen(QPen(Qt.blue, 2))
                 painter.drawEllipse(x1 - r, y1 - r, 2*r, 2*r)
-                # vẽ id cạnh hình
-                painter.setPen(Qt.yellow)
-                painter.drawText(x1, y1 - r - 5, f"ID:{idx}")
+
+                
 
                 # Vẽ lớp phủ lên
                 brush = QBrush(QColor(0, 0, 255, 40))  # blue, alpha=40/255
                 painter.setBrush(brush)
                 painter.setPen(Qt.NoPen)  # bỏ viền khi fill
                 painter.drawEllipse(x1 - r, y1 - r, 2 * r, 2 * r)
+
+                # === Vẽ hướng và handler ===
+                # hx, hy = self.get_handle_pos()
+                hx, hy = CircleTool().get_handle_pos_virtual((x1, y1), (x2, y2), angle)
+                hx, hy = int(hx), int(hy)
+
+                painter.setPen(QPen(Qt.green, 1))
+                painter.drawLine(int(x1), int(y1), hx, hy)
+
+                painter.setBrush(QBrush(Qt.green))
+                painter.drawEllipse(QPointF(hx, hy), 4, 4)
+
+                # === Hiển thị góc ===
+                painter.setPen(QPen(Qt.white))
+                painter.drawText(hx + 10, hy, f"{int(angle)}°")
+
+                # vẽ id cạnh hình
+                painter.setPen(Qt.yellow)
+                painter.drawText(x1, y1 - r - 5, f"ID:{idx}")
+                painter.setBrush(Qt.NoBrush)
+
+
 
             elif shape[0] == "polygon":
                 _, points, idx = shape
@@ -317,7 +341,7 @@ class ToolManager:
                 self.save_cropped_image(cropped_masked)
 
         elif shape_type == "circle":
-            _, start, end = shape
+            _, start, end, angle = shape
             x1, y1 = map(int, start)
             x2, y2 = map(int, end)
 

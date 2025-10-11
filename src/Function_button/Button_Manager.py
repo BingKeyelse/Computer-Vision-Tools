@@ -1,9 +1,24 @@
 from libs import*
 
 class ButtonController:
-    def __init__(self, ui, tool_manager, canvas, canvas_Sample, cam_function, data_functions, Matching_Controller):
+    def __init__(self, ui: object, tool_manager: object, canvas: object, canvas_Sample: object, 
+                 cam_function: object, data_functions: object, Matching_Controller: object):
         """
-        Chứa tất cả các hàm liên quan đến Button
+        ## Controller quản lý toàn bộ sự kiện và hành động của Button trong UI
+
+        - Input:
+            - ui: giao diện người dùng chính (MainUI)
+            - tool_manager: quản lý công cụ vẽ (Box, Circle, Polygon...)
+            - canvas: vùng hiển thị ảnh chính
+            - canvas_Sample: vùng hiển thị sample
+            - cam_function: nhóm chức năng xử lý camera
+            - data_functions: nhóm hàm thao tác dữ liệu
+            - Matching_Controller: nhóm xử lý matching (so khớp template)
+        
+        - Chức năng chính:
+            - Gắn kết toàn bộ button trên UI với hành động tương ứng.
+            - Điều phối qua lại giữa các module chính: Camera, Tool, Matching, Data.
+            - Cập nhật canvas khi có thay đổi từ người dùng (cut, clear, undo...).
         """
         self.ui = ui
         self.tool_manager= tool_manager
@@ -280,30 +295,46 @@ class ButtonController:
         except ValueError:
             return False
     
+# ================ BaseController ================
+class BaseController:
+    """
+    ## BaseController: chứa các tài nguyên dùng chung cho controller con
+    - Input:
+        - ui: đối tượng giao diện chính (MainUI)
+        - tool_manager: quản lý các tool vẽ
+        - canvas_Image: widget/canvas hiển thị ảnh chính
+        - canvas_Sample: widget/canvas hiển thị sample
+        - Data_Functions: đối tượng chứa hàm thao tác dữ liệu (DB)
+        - Matching_Controller: đối tượng xử lý matching (pipeline)
+    - Output:
+        - None (lưu trữ các tham chiếu để controller con dùng)
+    - Ghi chú:
+        - Không lưu dữ liệu nặng (images) ở đây; chỉ giữ reference.
+        - Nếu cần, override `init_signals()` trong subclass để connect signals.
+    """
+    def __init__(self, ui, tool_manager, canvas_Image, canvas_Sample, Data_Functions, Matching_Controller):
+        self.ui = ui
+        self.tool_manager = tool_manager
+        self.canvas_Image = canvas_Image
+        self.canvas_Sample = canvas_Sample
+        self.Data_Functions = Data_Functions
+        self.Matching_Controller = Matching_Controller
 
-class Sample_button:
+# ================ Sample_button ================
+class Sample_button(BaseController):
     """
     ## Chức năng button dành riêng cho phần Sample
     """
-    def __init__(self, controller: ButtonController):
-        """
-        ## Khởi tạo biến để chạy chức năng cho phần Sample Button
-        - Phải có đủ các đối tượng thừa kết từ ButtonController
-            - ui: phần giao diện thừa kế
-            - tool_manager: phần thừa thế Tool Manager 
-            - canvas: phần thừa kế để hiện thị ảnh ở phần chính giữa
-            - canvas_Sample: phần thừa kế để hiện thị ảnh Sample
-            - data_SHAPE: dữ liệu data_SHAPE kế thừa từ ButtonController để tiện sử dụng và cập nhập 
-            - Data_Functions: thừa kế class DatabaseController
-        """
-        # super().__init__(ui, tool_manager, canvas, canvas_Sample) phải lấy lại hết đối số này nhé
-        self.controller= controller
-        self.ui= controller.ui
-        self.tool_manager = controller.tool_manager
-        self.canvas_Image = controller.canvas_Image
-        self.canvas_Sample = controller.canvas_Sample
-        # self.data_SHAPE = self.controller.data_SHAPE
-        self.Data_Functions = controller.Data_Functions
+    def __init__(self, controller: "ButtonController"):
+        super().__init__(
+            controller.ui,
+            controller.tool_manager,
+            controller.canvas_Image,
+            controller.canvas_Sample,
+            controller.Data_Functions,
+            controller.Matching_Controller
+        )
+        self.controller = controller
 
         # Setup click with stick Sample
         for i in range(1, 12):
@@ -454,33 +485,23 @@ def rotate_image_keep_all(img, angle, borderValue=(255, 255, 255)):
     M[1, 2] += (new_h - h) / 2
     return M, (new_w, new_h)
 
-class Matching_button:
+# ================ Matching_button ================
+class Matching_button(BaseController):
     """
     ## Chức năng button dành riêng cho phần Matching Controller
     """
-    def __init__(self, controller: ButtonController):
-        """
-        ## Khởi tạo biến để chạy chức năng cho phần Sample Button
-        - Phải có đủ các đối tượng thừa kết từ ButtonController
-            - ui: phần giao diện thừa kế
-            - tool_manager: phần thừa thế Tool Manager 
-            - canvas: phần thừa kế để hiện thị ảnh ở phần chính giữa
-            - canvas_Sample: phần thừa kế để hiện thị ảnh Sample
-            - data_SHAPE: dữ liệu data_SHAPE kế thừa từ ButtonController để tiện sử dụng và cập nhập 
-            - Data_Functions: thừa kế class DatabaseController
-        """
-        # super().__init__(ui, tool_manager, canvas, canvas_Sample) phải lấy lại hết đối số này nhé
-        self.controller= controller
-        self.ui= controller.ui
-        self.tool_manager = controller.tool_manager
-        self.canvas_Image = controller.canvas_Image
-        self.canvas_Sample = controller.canvas_Sample
-        # self.data_SHAPE = controller.data_SHAPE
-        # self.scale = controller.scale
-        # self.image_resized = controller.image_resized
-        self.Data_Functions = controller.Data_Functions
-        self.Matching_Controller = controller.Matching_Controller
+    def __init__(self, controller: "ButtonController"):
+        super().__init__(
+            controller.ui,
+            controller.tool_manager,
+            controller.canvas_Image,
+            controller.canvas_Sample,
+            controller.Data_Functions,
+            controller.Matching_Controller
+        )
+        self.controller = controller
 
+        # Gán sự kiện UI
         self.ui.btn_matching_process.clicked.connect(lambda: self.ui.stackedWidget_processing.setCurrentWidget(self.ui.page_matching))
         self.ui.btn_run_matching.clicked.connect(self.matching_processing)
 

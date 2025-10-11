@@ -1,7 +1,6 @@
 from libs import*
 
-# ================Canvas===================================
-
+# ================ Canvas ================
 class Canvas(QLabel):
     def __init__(self, parent=None):
         """
@@ -201,6 +200,7 @@ class Canvas(QLabel):
         self.image_scaled = None
         self.update()
 
+# ================ MainWindow ================
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()

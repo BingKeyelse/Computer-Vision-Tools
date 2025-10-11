@@ -1,7 +1,17 @@
 from libs import*
 
-def rotate_image_keep_all(img, angle, borderValue=(255, 255, 255)):
-    """Rotate image around center but keep full content (expanded canvas)."""
+def rotate_image_keep_all(img: np.ndarray, angle: float, borderValue: tuple[int, int, int] = (255, 255, 255)
+    ) -> tuple[np.ndarray, tuple[int, int]]:
+    """
+    ## Giữ nguyên toàn bộ nội dung khi xoay ảnh
+    - Input:
+        - img: ảnh đầu vào
+        - angle: góc xoay (độ)
+        - borderValue: màu nền thêm vào khi mở rộng canvas
+    - Output:
+        - M: ma trận xoay 2x3
+        - (new_w, new_h): kích thước mới sau khi xoay
+    """
     (h, w) = img.shape[:2]
     angle_rad = np.deg2rad(angle)
     cos, sin = abs(np.cos(angle_rad)), abs(np.sin(angle_rad))
@@ -12,29 +22,58 @@ def rotate_image_keep_all(img, angle, borderValue=(255, 255, 255)):
     M[1, 2] += (new_h - h) / 2
     return M, (new_w, new_h)
 
-
+# ================ BoxMatcher ================
 class BoxMatcher(BaseMatcher):  
-    def __init__(self, temple_path, data, scale):
+    def __init__(self, temple_path: str, data: list, scale: float) -> None:
+        """
+        ## Matcher cho hình hộp chữ nhật
+        - Input:
+            - temple_path: đường dẫn ảnh template
+            - data: dữ liệu shape gồm ("box", start, end)
+            - scale: tỉ lệ resize ảnh template
+        """
         super().__init__(temple_path, data, scale)
-        self.template = None
+        self.template: np.ndarray | None = None
 
-    def load_template(self):
+    def load_template(self)-> np.ndarray:
+        """
+        ## Load và crop ảnh template gốc theo tọa độ
+        - Output:
+            - template: ảnh template đã resize theo scale
+        """
         _, (x1, y1), (x2, y2) = self.data
         img = cv2.imread(self.temple_path, cv2.IMREAD_GRAYSCALE)
         self.template = img[int(y1):int(y2), int(x1):int(x2)]
         self.template = cv2.resize(self.template, (0,0), fx= self.scale, fy= self.scale)
         return self.template
 
-    def match(self, scene,
-              coarse_scale=0.3,
-              coarse_step=10,
-              refine_step=2,
-              threshold=0.7,
-              max_candidates=10,
-              max_objects=5,
-              pad=20):
+    def match(
+        self,
+        scene: np.ndarray,
+        coarse_scale: float = 0.3,
+        coarse_step: int = 10,
+        refine_step: int = 2,
+        threshold: float = 0.7,
+        max_candidates: int = 15,
+        max_objects: int = 5,
+        pad: int = 20
+    ) -> list[dict[str, float | list[int]]]:
         """
-        Dò tìm template hình hộp chữ nhật trong scene với coarse→refine
+        ## Dò tìm template hình hộp chữ nhật trong scene (quét coarse → refine).
+        - input:
+            - scene: ảnh gốc cần dò tìm
+            - coarse_scale: tỉ lệ giảm kích thước ảnh cho bước coarse
+            - coarse_step: bước xoay góc trong giai đoạn coarse
+            - refine_step: bước xoay tinh trong refine
+            - threshold: ngưỡng tương quan tối thiểu
+            - max_candidates: số lượng ứng viên tối đa để refine
+            - max_objects: số đối tượng giữ lại sau NMS
+            - pad: vùng đệm quanh box khi refine
+        - output:
+            - Danh sách dict chứa:
+                - "box": [x1, y1, x2, y2]
+                - "angle": góc tìm thấy (độ)
+                - "score": độ tương đồng
         """
         if self.template is None:
             self.load_template()

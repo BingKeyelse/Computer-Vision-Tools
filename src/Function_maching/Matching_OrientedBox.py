@@ -1,7 +1,20 @@
 from libs import*
 
-def rotate_image_keep_all(img, angle, borderValue=(255, 255, 255)):
-    """Rotate image around center but keep full content (expanded canvas)."""
+def rotate_image_keep_all(img: np.ndarray, angle: float, borderValue: tuple[int, int, int] = (255, 255, 255)
+    ) -> tuple[np.ndarray, tuple[int, int]]:
+    """
+    ## Xoay ảnh quanh tâm nhưng vẫn giữ toàn bộ nội dung (canvas mở rộng)
+    - input
+        - img: ảnh đầu vào (numpy.ndarray)
+        - angle: góc xoay (độ, chiều ngược kim đồng hồ)
+        - borderValue: màu nền viền khi mở rộng canvas (mặc định trắng)
+    - output
+        - M: ma trận xoay 2x3 để sử dụng trong `cv2.warpAffine`
+        - (new_w, new_h): kích thước mới của ảnh sau khi xoay
+    - Ghi chú
+        - Hàm này chỉ tính toán ma trận và kích thước, không thực hiện xoay.
+        - Dùng khi cần xoay ảnh mà không bị mất phần nào của nội dung.
+    """
     (h, w) = img.shape[:2]
     angle_rad = np.deg2rad(angle)
     cos, sin = abs(np.cos(angle_rad)), abs(np.sin(angle_rad))
@@ -12,11 +25,22 @@ def rotate_image_keep_all(img, angle, borderValue=(255, 255, 255)):
     M[1, 2] += (new_h - h) / 2
     return M, (new_w, new_h)
 
-def extract_oriented_object(img, start, end, angle_rad):
+def extract_oriented_object(img: np.ndarray, start: tuple, end: tuple, angle_rad:float
+    )-> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Chuẩn hóa vùng oriented box về phương nằm ngang.
-    - start, end: 2 điểm đối diện nhau (đường chéo)
-    - angle_rad: góc nghiêng (radian)
+    ## Chuẩn hóa vùng oriented box (nghiêng) về hướng nằm ngang
+    - input
+        - img: ảnh đầu vào (numpy.ndarray)
+        - start: tọa độ điểm đầu (x1, y1)
+        - end: tọa độ điểm đối diện đường chéo (x2, y2)
+        - angle_rad: góc nghiêng của box (radian)
+    - output
+        - cropped: vùng đối tượng đã được xoay thẳng và crop ra
+        - rotated: ảnh toàn cảnh sau khi xoay toàn bộ để “dựng thẳng”
+        - box_rotated: tọa độ polygon 4 đỉnh của box trong ảnh đã xoay
+    - Giải thích
+        - Hàm này dùng để xử lý template hoặc đối tượng nghiêng (oriented box)
+          và đưa nó về hướng chuẩn (nằm ngang) để dễ matching.
     """
     # Chuyển góc sang độ
     angle_deg = np.degrees(angle_rad)
@@ -62,12 +86,28 @@ def extract_oriented_object(img, start, end, angle_rad):
     return cropped, rotated, box_rotated.astype(np.int32)
 
 
+# ================ OrientedBoxMatcher ================
 class OrientedBoxMatcher(BaseMatcher):  
-    def __init__(self, temple_path, data, scale):
+    """
+    ## Lớp xử lý template matching cho vùng oriented box (nghiêng).
+    - Tự động dựng thẳng template và quét đa góc (coarse → refine).
+    """
+    def __init__(self, temple_path: str, data: list, scale: float):
+        """
+        - input:
+            - temple_path: đường dẫn đến ảnh template
+            - data: thông tin vùng oriented box (x1, y1, x2, y2, angle)
+            - scale: tỉ lệ phóng template
+        """
         super().__init__(temple_path, data, scale)
-        self.template = None
+        self.template: np.ndarray | None = None
 
-    def load_template(self):
+    def load_template(self)-> np.ndarray:
+        """
+        ## Load và dựng thẳng vùng oriented box trong template.
+        - output:
+            - template đã được dựng thẳng, resize theo scale
+        """
         _, (x1, y1), (x2, y2), angle = self.data
         img = cv2.imread(self.temple_path, cv2.IMREAD_GRAYSCALE)
 
@@ -87,16 +127,33 @@ class OrientedBoxMatcher(BaseMatcher):
         self.template = cv2.resize(self.template, (0,0), fx= self.scale, fy= self.scale)
         return self.template
 
-    def match(self, scene,
-              coarse_scale=0.3,
-              coarse_step=10,
-              refine_step=2,
-              threshold=0.7,
-              max_candidates=15,
-              max_objects=5,
-              pad=20):
+    def match(
+        self,
+        scene: np.ndarray,
+        coarse_scale: float = 0.3,
+        coarse_step: int = 10,
+        refine_step: int = 2,
+        threshold: float = 0.7,
+        max_candidates: int = 15,
+        max_objects: int = 5,
+        pad: int = 20
+    ) -> list[dict[str, float | list[int]]]:
         """
-        Dò tìm template hình hộp chữ nhật trong scene với coarse→refine
+        ## Dò tìm template hình hộp chữ nhật trong scene (quét coarse → refine).
+        - input:
+            - scene: ảnh gốc cần dò tìm
+            - coarse_scale: tỉ lệ giảm kích thước ảnh cho bước coarse
+            - coarse_step: bước xoay góc trong giai đoạn coarse
+            - refine_step: bước xoay tinh trong refine
+            - threshold: ngưỡng tương quan tối thiểu
+            - max_candidates: số lượng ứng viên tối đa để refine
+            - max_objects: số đối tượng giữ lại sau NMS
+            - pad: vùng đệm quanh box khi refine
+        - output:
+            - Danh sách dict chứa:
+                - "box": [x1, y1, x2, y2]
+                - "angle": góc tìm thấy (độ)
+                - "score": độ tương đồng
         """
         if self.template is None:
             self.load_template()
@@ -207,65 +264,9 @@ class OrientedBoxMatcher(BaseMatcher):
 
         keep = sorted(keep.flatten(), key=lambda i: scores[i], reverse=True)[:max_objects]
 
-        #### Test
-        # # --- Hiển thị oriented boxes ---
-        # scene_color = cv2.cvtColor(scene, cv2.COLOR_GRAY2BGR)
-        # h_t, w_t = template.shape[:2]  # kích thước thật của template
-
-        # for index in keep: # Lấy index của keep ra 
-        #     r = refine_results[index]
-        #     x1, y1, x2, y2 = r["box"]
-        #     angle = r["angle"]
-        #     score = r["score"]
-
-        #     # ---- Tính lại vị trí thực tế của template gốc trong ảnh xoay ----
-        #     # Xoay template gốc để biết offset
-        #     M_rot, (new_w, new_h) = rotate_image_keep_all(template, angle)
-
-        #     # Tính vị trí của template gốc (w_t,h_t) khi chưa xoay
-        #     corners_t = np.array([
-        #         [0, 0],
-        #         [w_t, 0],
-        #         [w_t, h_t],
-        #         [0, h_t]
-        #     ], dtype=np.float32)
-
-        #     ones = np.ones((4, 1), dtype=np.float32)
-        #     corners_h = np.hstack([corners_t, ones])
-        #     rotated_t = (M_rot @ corners_h.T).T  # Toạ độ template gốc trong canvas và đã được xoay với 4 điểm góc hình chữ nhật đã xoay rồi
-
-        #     # Lấy minX, minY để dịch về vị trí match
-        #     offset_x = rotated_t[:, 0].min()
-        #     offset_y = rotated_t[:, 1].min()
-
-        #     # Dịch các góc về vị trí thật trong scene
-        #     rotated_in_scene = rotated_t - [offset_x, offset_y] + [x1, y1]
-        #     rotated_in_scene = rotated_in_scene.astype(np.int32)
-
-        #     # --- Vẽ polygon ---
-        #     cv2.polylines(scene_color, [rotated_in_scene], isClosed=True, color=(0, 255, 0), thickness=2)
-
-        #     # Tính tâm trung bình
-        #     cx, cy = np.mean(rotated_in_scene, axis=0).astype(int)
-        #     cv2.putText(scene_color, f"angle: {angle:.1f}deg and score: {score:.2f}",
-        #                 (int(cx), int(cy) - 10),
-        #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-
-        # print(f"⏱ Tổng thời gian: {time.time() - t0:.2f}s")
-        # cv2.imshow("Coarse-Refine Detection", scene_color)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
         print(f"✅ [REFINE] giữ lại {len(keep)} đối tượng.")
         print(f"⏱ Tổng thời gian: {time.time() - t0:.2f}s")
 
         return [refine_results[i] for i in keep]
 
-## Cách dùng
-# scene = cv2.imread("scene.jpg", cv2.IMREAD_GRAYSCALE)
-# matcher = BoxMatcher("template_source.jpg", ('box', (100, 200), (400, 600)))
-# matcher.load_template()
-# results = matcher.match(scene)
-# for r in results:
-#     print(r)
 
