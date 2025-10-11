@@ -16,7 +16,7 @@ class USBCamera(BaseCamera):
         '''
         self.index = index
 
-    def connect(self):
+    def connect(self, *args, **kwargs):
         """## Kiểm tra kết nối
         - Nếu đang kết nối, kiểm tra lại bằng cách đọc thử 1 frame\
         """

@@ -14,19 +14,16 @@ class BaslerCamera(BaseCamera):
         self.camera = None
         self.converter = None
 
-    def connect(self):
+    def connect(self, devices, tl_factory):
         """
         ## Kiểm tra thiết bị kết nối camera Basler
         - Kiểm tra só sánh với serial và xong sau đó thì gán self.camera và self.converter
         """
         try:
-            tl_factory = pylon.TlFactory.GetInstance()
-            devices = tl_factory.EnumerateDevices()
-            if not devices:
-                self.connected = False
-                return
-
-            # Tìm đúng camera theo serial
+            # # Kiểm tra danh sách camera
+            # if not devices:
+            #     raise ValueError("No camera devices found.")
+            
             device = None
             if self.serial:
                 for d in devices:

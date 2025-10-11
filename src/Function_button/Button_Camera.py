@@ -3,7 +3,7 @@ from libs import*
 class CameraChecker(QThread):
     finished = pyqtSignal(list)
 
-    def __init__(self, cameras):
+    def __init__(self, cameras, devices, tl_factory):
         """
         ## Scan camera đang có
         - Args:
@@ -11,16 +11,21 @@ class CameraChecker(QThread):
         """
         super().__init__()
         self.cameras = cameras
+        self.devices = devices
+        self.tl_factory = tl_factory
 
     def run(self):
         """
         ## Emit data những cam được quét để trở về hàm kết nối
         """
         available = []
-        for name, cam in self.cameras.items():
-            cam.connect()
+        print("Number of devices:", len(self.devices))
+        for name, cam in self.cameras.items():                         
+            cam.connect(self.devices, self.tl_factory)
+            # print("aaa")
             if cam.connected:
                 available.append(name)
+        print("Number of devices:", len(self.devices))
         self.finished.emit(available)  # gửi lại kết quả
 
 class CameraFunctions:
@@ -41,7 +46,7 @@ class CameraFunctions:
         self.active_cam = None
         self.active_name = None
 
-        self.ui.btn_check_cam.clicked.connect(self.check_cameras)
+        self.ui.btn_check_cam.clicked.connect(self.init_cam)
 
         self.ui.btn_trigsoft.clicked.connect(self.capture_frame)
 
@@ -49,6 +54,17 @@ class CameraFunctions:
         self.ui.btn_choose_cam.addItem("None")
         self.ui.btn_choose_cam.currentTextChanged.connect(self.select_camera)
         self.timer_0.timeout.connect(self.update_frame)
+    
+    def init_cam(self):
+        """
+        - Kiem tra so luong camera o trong thread main de tranh loi
+        - Sau do goi phuong thuc check_cameras()
+        """
+        self.tl_factory = pylon.TlFactory.GetInstance()
+        self.devices = self.tl_factory.EnumerateDevices()
+        if not self.devices:
+            self.connected = False
+        self.check_cameras()
     
     def check_cameras(self):
         """
@@ -58,7 +74,7 @@ class CameraFunctions:
         """
         self.ui.btn_check_cam.setText("🔄Checking...")
 
-        self.thread = CameraChecker(self.cameras)
+        self.thread = CameraChecker(self.cameras, self.devices, self.tl_factory)
         self.thread.finished.connect(self._on_check_done)
         self.thread.start()  # ✅ start mà không block UI
     
