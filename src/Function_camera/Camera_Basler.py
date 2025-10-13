@@ -1,6 +1,5 @@
 from libs import*
 
-
 class BaslerCamera(BaseCamera):
     def __init__(self, name, serial=None):
         """
@@ -16,19 +15,15 @@ class BaslerCamera(BaseCamera):
 
     def connect(self, devices, tl_factory):
         """
-        ## Kiểm tra thiết bị kết nối camera Basler
         - Kiểm tra só sánh với serial và xong sau đó thì gán self.camera và self.converter
         """
         try:
-            # # Kiểm tra danh sách camera
-            # if not devices:
-            #     raise ValueError("No camera devices found.")
-            
             device = None
             if self.serial:
                 for d in devices:
                     if d.GetSerialNumber() == self.serial:
                         device = d
+                        print(f"{device}")
                         break
             else:
                 device = devices[0]  # lấy camera đầu tiên

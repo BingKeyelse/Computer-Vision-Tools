@@ -19,6 +19,7 @@ from pypylon import pylon
 import time
 import sqlite3
 
+
 # ==== Base Mouse cho tất cả tools ====
 class MouseTool:
     """
