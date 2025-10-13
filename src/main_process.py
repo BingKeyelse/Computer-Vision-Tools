@@ -28,6 +28,7 @@ class Canvas(QLabel):
             - link_image: link ảnh gốc dùng để đọc full size
             - scale: tỉ lệ resize ảnh
         """
+        print('vo được rồi')
         if image is None:
             return
         # print("ToolManager nhận image:", type(image), getattr(image, "shape", None))
@@ -35,6 +36,7 @@ class Canvas(QLabel):
 
         # Truyền ảnh gốc vào đây
         self.original_image= image
+        print(self.original_image.shape)
 
         # Truyền ảnh ở trạng thái 
         self.link_image= link_image
@@ -235,10 +237,16 @@ class MainWindow(QMainWindow):
         self.tool_manager.set_tool(BoxTool())
 
         # Setup canvas cho Sample
-        self.canvas_Sample = Canvas(parent=self.ui.label_5)
-        layout_Sample = QVBoxLayout(self.ui.label_5) 
+        self.canvas_Sample = Canvas(parent=self.ui.screen_Sample)
+        layout_Sample = QVBoxLayout(self.ui.screen_Sample) 
         layout_Sample.setContentsMargins(0,0,0,0) 
         layout_Sample.addWidget(self.canvas_Sample)
+
+        # Setup canvas cho Matching
+        self.canvas_Matching = Canvas(parent=self.ui.screen_matching)
+        layout_matching = QVBoxLayout(self.ui.screen_matching) 
+        layout_matching.setContentsMargins(0,0,0,0) 
+        layout_matching.addWidget(self.canvas_Matching)
 
         # Khởi tạo kiểu Cam và phân loại kết nối phù hợp USB hay Basler
         self.timer_0 = QTimer() # Khởi tạo timer dùng cho quản lý Camera 
@@ -252,13 +260,14 @@ class MainWindow(QMainWindow):
 
         # Database
         self.Data_Functions= DatabaseController(self.ui, self.tool_manager, self.canvas_Image, 
-                                                self.canvas_Sample, self.Cam_Functions, 
+                                                self.canvas_Sample,  self.Cam_Functions, 
                                                 self.current_file_path)
 
         # Viết chức năng cho từng nút nhấn riêng
         self.Button_Controller = ButtonController(self.ui, self.tool_manager, self.canvas_Image, 
-                                                  self.canvas_Sample, self.Cam_Functions, 
-                                                  self.Data_Functions, self.Matching_Controller)   
+                                                  self.canvas_Sample, self.canvas_Matching, 
+                                                  self.Cam_Functions, self.Data_Functions, 
+                                                  self.Matching_Controller)   
         
         # Tạo custom với ListWidget của ListImage và tạo singal với slot (hàm) muốn custom
         self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom

@@ -1,6 +1,5 @@
 from libs import*
 
-
 class BaslerCamera(BaseCamera):
     def __init__(self, name, serial=None):
         """
@@ -19,6 +18,7 @@ class BaslerCamera(BaseCamera):
         ## Kiểm tra thiết bị kết nối camera Basler
         - Kiểm tra só sánh với serial và xong sau đó thì gán self.camera và self.converter
         """
+        print('kêt nối được luôn')
         try:
             tl_factory = pylon.TlFactory.GetInstance()
             devices = tl_factory.EnumerateDevices()
@@ -32,7 +32,7 @@ class BaslerCamera(BaseCamera):
                 for d in devices:
                     if d.GetSerialNumber() == self.serial:
                         device = d
-                        break
+                        return
             else:
                 device = devices[0]  # lấy camera đầu tiên
 

@@ -2,7 +2,8 @@ from libs import*
 
 class ButtonController:
     def __init__(self, ui: object, tool_manager: object, canvas: object, canvas_Sample: object, 
-                 cam_function: object, data_functions: object, Matching_Controller: object):
+                 canvas_Matching: object, cam_function: object, data_functions: object, 
+                 Matching_Controller: object):
         """
         ## Controller quản lý toàn bộ sự kiện và hành động của Button trong UI
 
@@ -22,8 +23,10 @@ class ButtonController:
         """
         self.ui = ui
         self.tool_manager= tool_manager
+
         self.canvas_Image= canvas
         self.canvas_Sample= canvas_Sample
+        self.canvas_Matching= canvas_Matching
 
         self.camera_function = cam_function
         self.Data_Functions= data_functions
@@ -39,7 +42,7 @@ class ButtonController:
         # Function ToolBar
         self.link_picutures= []
         self.ui.btn_open.clicked.connect(self.get_link_image)
-        self.ui.btn_save.clicked.connect(self.save_current_frame) #Ken
+        self.ui.btn_save.clicked.connect(self.save_current_frame)
 
         # self.ui.list_image.setContextMenuPolicy(Qt.CustomContextMenu) # Không dùng context mặc định mà dùng dạng custom
         # self.ui.list_image.customContextMenuRequested.connect(self.show_list_menu)# Khi bạn bấm chuột phải vào thì phát singal tới slot được định, và auto truyền pos
@@ -312,11 +315,14 @@ class BaseController:
         - Không lưu dữ liệu nặng (images) ở đây; chỉ giữ reference.
         - Nếu cần, override `init_signals()` trong subclass để connect signals.
     """
-    def __init__(self, ui, tool_manager, canvas_Image, canvas_Sample, Data_Functions, Matching_Controller):
+    def __init__(self, ui, tool_manager, canvas_Image, canvas_Sample, canvas_Matching, Data_Functions, Matching_Controller):
         self.ui = ui
         self.tool_manager = tool_manager
+
         self.canvas_Image = canvas_Image
         self.canvas_Sample = canvas_Sample
+        self.canvas_Matching = canvas_Matching
+
         self.Data_Functions = Data_Functions
         self.Matching_Controller = Matching_Controller
 
@@ -331,6 +337,7 @@ class Sample_button(BaseController):
             controller.tool_manager,
             controller.canvas_Image,
             controller.canvas_Sample,
+            controller.canvas_Matching,
             controller.Data_Functions,
             controller.Matching_Controller
         )
@@ -496,6 +503,7 @@ class Matching_button(BaseController):
             controller.tool_manager,
             controller.canvas_Image,
             controller.canvas_Sample,
+            controller.canvas_Matching,
             controller.Data_Functions,
             controller.Matching_Controller
         )
@@ -504,6 +512,9 @@ class Matching_button(BaseController):
         # Gán sự kiện UI
         self.ui.btn_matching_process.clicked.connect(lambda: self.ui.stackedWidget_processing.setCurrentWidget(self.ui.page_matching))
         self.ui.btn_run_matching.clicked.connect(self.matching_processing)
+        self.ui.btn_run_matching.clicked.connect(lambda: (self.ui.stackwidget.setCurrentWidget(self.ui.page_sub_2)))
+        self.ui.btn_return_matching.clicked.connect(lambda: (self.ui.stackwidget.setCurrentWidget(self.ui.page_sub_1)))
+        
 
         self.data_matching=[]
         # Lấy giá trị trong dataset
@@ -512,8 +523,6 @@ class Matching_button(BaseController):
         # Define thanh kéo
         self.define_UI()
 
-        
-        
     def define_UI(self):
         """
         ## Liên kết UI với các sự kiện điều khiển
@@ -594,113 +603,140 @@ class Matching_button(BaseController):
         self.ui.edit_max_objects_matching.setText(f'{self.data_matching[2]}')
 
     def matching_processing(self):
-        mode_NMS=1
+        """
+        ## matching_processing()
+        ---
+        **Chức năng:**  
+        Thực hiện toàn bộ quy trình **matching (so khớp template)** giữa các mẫu (template)
+        đã lưu trong `data_SHAPE` với ảnh hiện tại (`image_resized`) trên canvas chính.  
+        Kết quả sau khi matching sẽ được **lọc NMS, vẽ lên ảnh, và hiển thị trên canvas_Matching**.
+
+        ---
+        ### 🧩 Quy trình chi tiết:
+
+        1. **Duyệt qua danh sách các mẫu (`data_SHAPE`)**
+        - Mỗi phần tử gồm:
+            ```
+            {
+                "mode": int,           # Chỉ mode=1 mới được chạy matching
+                "link": str,           # Đường dẫn ảnh template gốc
+                "data": [type, start, end, angle?]  # Mô tả hình cắt
+            }
+            ```
+        - Lưu các kết quả `res` kèm thông tin `template_shape`, `template_angle`, `template_name` vào `res_data`.
+
+        2. **Thực hiện Non-Maximum Suppression (NMS) lần cuối**
+        - Gộp tất cả kết quả `res_data` từ các matcher.
+        - Nếu trống → dừng.
+        - Tính danh sách `boxes_xywh` và `scores`.
+        - Gọi `cv2.dnn.NMSBoxes()` để loại bỏ trùng lặp.
+
+        3. **Giữ lại các kết quả tốt nhất**
+        - Tạo `filtered_results` từ các box sau NMS.
+        - Giữ lại kết quả tốt nhất rồi vẽ lên canvas
+
+        """ 
+        self.ui.btn_run_matching.setText('Running...')
+        self.ui.btn_run_matching.repaint()
+        QApplication.processEvents()
+        self.canvas_Matching.clear_image()
+
+        time_start= time.time()
+
+        #  Khi có ảnh scene đầu vào thì truyền nó vào 
         if self.controller.image_resized is not None:
+            
+
             gray = cv2.cvtColor(self.controller.image_resized, cv2.COLOR_BGR2GRAY)
             draw_img = self.controller.image_resized.copy()
             res_data=[]
-            template_list=[]
 
             for data in self.controller.data_SHAPE:
-                if data['mode'] ==1: # Chỉ chấp nhận mode 1 mới cho kích hoạt chạy
+                '''
+                Gồm các giá trị
+                - Mode
+                - Link ảnh
+                - Data
+                    - Type shape
+                    - Start(x,y)
+                    - End(x,y)
+                    - Có thể tùy biến có angle kham khảo ở ToolManager với hàm crop_shape
+                '''
+                # print(data)
+                if data['mode'] == 1 and data['data'][0] != 'polygon': # Chỉ chấp nhận mode 1 mới cho kích hoạt chạy
+                    print(data)
                     matcher = self.Matching_Controller.create(data, self.controller.scale)
                     template= matcher.load_template()
                     res = matcher.match(scene = gray, 
                                         coarse_scale= self.data_matching[0],
                                         threshold= self.data_matching[1],
                                         max_objects= self.data_matching[2])
+                    
+                    shape_tuple = data.get('data')
+                    if not shape_tuple:
+                        continue
+                    
+                    angle= 0.0
+                    shape_type = shape_tuple[0]
+                    if shape_type == "box":
+                        angle = 0.0
+                    elif shape_type == "oriented_box":
+                        _, start, end, angle = shape_tuple
+                    elif shape_type == "circle":
+                        _, start, end, angle = shape_tuple
+
                     res_data.extend([
                                     {
                                         **r,
                                         "template_shape": template.shape[:2],
-                                        "template_angle": data.get("angle", 0),
+                                        "template_angle": angle,
                                         "template_name": data.get("name", "unknown")
                                     }
                                     for r in res
                                 ])
-                    
-                    if mode_NMS==0:
-                        print('Run not NMS')
-                        if res:
-                            # draw_img = self.controller.image_resized.copy()
-                            gray = cv2.cvtColor(draw_img, cv2.COLOR_BGR2GRAY)
-
-                            # Lấy template thực tế từ matcher để biết kích thước
-                            template = matcher.template
-                            h_t, w_t = template.shape[:2]  # Kích thước template
-
-                            for r in res:
-                                x1, y1, x2, y2 = r["box"]
-                                angle = r["angle"]
-                                score = r["score"]
-
-                                # --- Tính lại vị trí polygon thật của template ---
-                                M_rot, (new_w, new_h) = rotate_image_keep_all(template, angle)
-
-                                # 4 góc template gốc
-                                corners_t = np.array([
-                                    [0, 0],
-                                    [w_t, 0],
-                                    [w_t, h_t],
-                                    [0, h_t]
-                                ], dtype=np.float32)
-
-                                ones = np.ones((4, 1), dtype=np.float32)
-                                corners_h = np.hstack([corners_t, ones])
-                                rotated_t = (M_rot @ corners_h.T).T
-
-                                # Offset dịch polygon về vị trí match
-                                offset_x = rotated_t[:, 0].min()
-                                offset_y = rotated_t[:, 1].min()
-                                rotated_in_scene = rotated_t - [offset_x, offset_y] + [x1, y1]
-                                rotated_in_scene = rotated_in_scene.astype(np.int32)
-
-                                # --- Vẽ polygon xoay ---
-                                cv2.polylines(draw_img, [rotated_in_scene], isClosed=True, color=(0, 255, 0), thickness=2)
-
-                                # Tâm trung bình để ghi chữ
-                                cx, cy = np.mean(rotated_in_scene, axis=0).astype(int)
-                                cv2.putText(draw_img, f"angle: {angle:.1f}° | score: {score:.2f}",
-                                            (int(cx), int(cy) - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                                            0.5, (0, 255, 0), 1, cv2.LINE_AA)
             
+            print('Run NMS again one more')
             print(res_data)
-            if mode_NMS == 1:
-                print('Run NMS')
+            # --- 1. Kiểm tra dữ liệu ---
+            if len(res_data) == 0:
+                print("❌ Không có kết quả nào từ tất cả matcher.")
+                time_end= f'{time.time() - time_start:.2f}'
+                self.ui.label_time_process_matching.setText(time_end)
+                self.ui.btn_run_matching.setText('RUN')
+                return
 
-                # --- 1. Kiểm tra dữ liệu ---
-                if len(res_data) == 0:
-                    print("❌ Không có kết quả nào từ tất cả matcher.")
-                    return
+            # --- 2. Chuẩn bị dữ liệu cho NMS ---
+            boxes_xywh = []
+            for r in res_data:
+                x1, y1, x2, y2 = r["box"]
+                boxes_xywh.append([x1, y1, x2 - x1, y2 - y1])
 
-                # --- 2. Chuẩn bị dữ liệu cho NMS ---
-                boxes_xywh = []
-                for r in res_data:
-                    x1, y1, x2, y2 = r["box"]
-                    boxes_xywh.append([x1, y1, x2 - x1, y2 - y1])
+            scores = [r["score"] for r in res_data]
 
-                scores = [r["score"] for r in res_data]
+            # --- 3. Thực hiện NMS ---
+            keep = cv2.dnn.NMSBoxes(
+                bboxes=boxes_xywh,
+                scores=scores,
+                score_threshold=self.data_matching[1],  # threshold
+                nms_threshold=0.3                       # mức chồng lấn cho phép
+            )
 
-                # --- 3. Thực hiện NMS ---
-                keep = cv2.dnn.NMSBoxes(
-                    bboxes=boxes_xywh,
-                    scores=scores,
-                    score_threshold=self.data_matching[1],  # threshold
-                    nms_threshold=0.3                       # mức chồng lấn cho phép
-                )
+            if len(keep) == 0:
+                print("❌ Không còn box nào sau NMS.")
+                time_end= f'{time.time() - time_start:.2f}'
+                self.ui.label_time_process_matching.setText(time_end)
+                self.ui.btn_run_matching.setText('RUN')
+                return
 
-                if len(keep) == 0:
-                    print("❌ Không còn box nào sau NMS.")
-                    return
+            # --- 4. Lấy danh sách giữ lại ---
+            keep = keep.flatten()
+            filtered_results = [res_data[i] for i in keep]
 
-                # --- 4. Lấy danh sách giữ lại ---
-                keep = keep.flatten()
-                filtered_results = [res_data[i] for i in keep]
+            print(f"✅ Giữ lại {len(filtered_results)} box sau NMS")
 
-                print(f"✅ Giữ lại {len(filtered_results)} box sau NMS")
-
-                # --- 5. Vẽ kết quả ---
-                for r in filtered_results:
+            # --- 5. Vẽ kết quả ---
+            for r in filtered_results:
+                if r["shape"] == 'oriented_box' or r["shape"] == 'box':
                     x1, y1, x2, y2 = r["box"]
                     angle = r["angle"]
                     score = r["score"]
@@ -731,16 +767,54 @@ class Matching_button(BaseController):
                     # Vẽ polygon xoay
                     cv2.polylines(draw_img, [rotated_in_scene], isClosed=True, color=(0, 255, 0), thickness=2)
                     cx, cy = np.mean(rotated_in_scene, axis=0).astype(int)
-                    cv2.putText(draw_img, f"{name} | {score:.2f} | {angle:.1f}°",
+                    cv2.putText(draw_img, f"Score: {name} | {score:.2f} | Angle: {angle:.1f}",
                                 (cx, cy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    
+                elif  r["shape"] == 'circle':
+
+                    # --- Tạo mask tròn từ template (1-channel) ---
+                    h, w = r["template_shape"]
+                    center = (w // 2, h // 2)
+                    radius = max(1, min(center) - 5)
+                    mask_base = np.zeros((h, w), dtype=np.uint8)        # <-- 1 channel
+                    cv2.circle(mask_base, center, radius, 255, -1)
+                    
+                    angle = r["template_angle"]
+                    x1, y1, x2, y2 = map(int, r["box"])
+                    cx = int((x1 + x2) / 2)
+                    cy = int((y1 + y2) / 2)
+                    # Vẽ hình tròn
+                    cv2.circle(draw_img, (cx, cy), radius, (0, 255, 0), 3)
+
+
+                    # Lấy góc tổng hợp
+                    total_angle = r["angle"] + angle   # matching angle + template angle
+
+                    # Tính tọa độ tay cầm (điểm trên viền hình tròn)
+                    hx = int(cx + radius * np.cos(np.deg2rad(total_angle)))
+                    hy = int(cy - radius * np.sin(np.deg2rad(total_angle)))  # trừ vì trục y ảnh ngược
+
+                    # Vẽ tay cầm từ tâm ra biên
+                    cv2.line(draw_img, (cx, cy), (hx, hy), (0, 255, 0), 2)
+                    cv2.circle(draw_img, (hx, hy), 4, (0, 255, 255), -1)
+
+                    cv2.putText(draw_img, f"Score: ({r['score']:.2f}) | Angle: {(+ r['angle'] + angle):.1f}",
+                                (cx - radius, cy - radius - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            
+            self.canvas_Matching.set_image(draw_img, link_image=None)
 
             # --- 4. Hiển thị ---
-            cv2.imshow("Filtered Matching", draw_img)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            # cv2.imshow("Filtered Matching", draw_img)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
         else: 
-            print('none data')
+            print('None data')
             print(self.controller.scale)
+        
+        time_end= f'{time.time() - time_start:.2f}'
+        self.ui.label_time_process_matching.setText(time_end)
+        self.ui.btn_run_matching.setText('RUN')
                 
 
 

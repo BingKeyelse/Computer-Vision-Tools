@@ -24,17 +24,17 @@ class CameraChecker(QThread):
         self.finished.emit(available)  # gửi lại kết quả
 
 class CameraFunctions:
-    def __init__(self, ui, cameras, timer_0, canvas):
+    def __init__(self, ui, cameras, timer_0, canvas_Camera):
         """
         ## Kế thừa các giá trị từ mainWindow
         - ui: phần giao diện thừa kế
         - cameras: thừa kế toàn bộ giá trị Camera
         - timer: bộ đếm timer
-        - canvas: phần thừa kế để hiện thị ảnh ở phần chính giữa để chạy phần camera Realtime
+        - canvas_Camera: phần thừa kế để hiện thị ảnh ở phần chính giữa để chạy phần camera Realtime
         
         """
         self.ui = ui
-        self.canvas = canvas
+        self.canvas_Camera = canvas_Camera
         self.timer_0 = timer_0
         self.cameras = cameras
 
@@ -99,11 +99,11 @@ class CameraFunctions:
         """
         if not name or name == "None":  
             '''
-            Khi mà không có cam thì clear nó đi và nhớ cập nhập ở canvas
+            Khi mà không có cam thì clear nó đi và nhớ cập nhập ở canvas_Camera
             '''
             self.active_cam = None
             self.active_name = None
-            self.canvas.clear_image()
+            self.canvas_Camera.clear_image()
             self.timer_0.stop()
             return
 
@@ -122,12 +122,12 @@ class CameraFunctions:
 
     def update_frame(self):
         """
-        ## Hiển thị video thu thập lên trên canvas + Timer 0
+        ## Hiển thị video thu thập lên trên canvas_Camera + Timer 0
         """
         if self.active_cam:
             frame = self.active_cam.get_frame()
             if frame is not None: 
-                self.canvas.set_image(frame, link_image = None)
+                self.canvas_Camera.set_image(frame, link_image = None)
             else:
                 '''Camera mất kết nối khi đang stream'''
                 self.timer_0.stop()

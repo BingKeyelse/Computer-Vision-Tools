@@ -155,6 +155,7 @@ class BoxMatcher(BaseMatcher):
                 abs_loc = (max_loc[0] + x1p, max_loc[1] + y1p)
                 if (best_local is None) or (max_val > best_local["score"]):
                     best_local = {
+                        "shape": "box",
                         "box": [abs_loc[0], abs_loc[1],
                                 abs_loc[0] + new_w, abs_loc[1] + new_h],
                         "angle": a,
