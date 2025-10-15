@@ -63,6 +63,7 @@ class CameraFunctions:
         - Kiem tra so luong camera o trong thread main de tranh loi
         - Sau do goi phuong thuc check_cameras()
         """
+        self.ui.btn_check_cam.setText("🔄Checking...")
         self.timer_0.stop()
         self.tl_factory = pylon.TlFactory.GetInstance()
         self.devices = self.tl_factory.EnumerateDevices()
@@ -76,7 +77,7 @@ class CameraFunctions:
         - Kết nới với một thread để check camera
         - Emit singal đến hàm self._on_check_done để cập nhập giao diện
         """
-        self.ui.btn_check_cam.setText("🔄Checking...")
+        
 
         self.thread = CameraChecker(self.cameras, self.devices, self.tl_factory, self.ui)
         self.thread.finished.connect(self._on_check_done)
