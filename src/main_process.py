@@ -189,7 +189,7 @@ class Canvas(QLabel):
 
         if self.tool_manager:
             # painter = QPainter(self) # QPainter chính là cây cọ trong Qt,
-            # self.tool_manager.draw(painter) # Đưa cọ cho ToolManager để nó vứt cho thằng nào thì vứt để sài
+            # self.tool_manager.draw(painter) # Đưa cọ cho ToolManager để nó vứt cho thằng nào thì  vứt để sài
             self.tool_manager.draw(painter, self.x_offset, self.y_offset, self.ratio_base_image, self.scale)
     
     def clear_image(self)-> None: 

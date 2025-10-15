@@ -3,7 +3,7 @@ from libs import*
 class CameraChecker(QThread):
     finished = pyqtSignal(list)
 
-    def __init__(self, cameras):
+    def __init__(self, cameras, devices, tl_factory, ui):
         """
         ## Scan camera đang có
         - Args:
@@ -11,15 +11,23 @@ class CameraChecker(QThread):
         """
         super().__init__()
         self.cameras = cameras
+        self.devices = devices
+        self.tl_factory = tl_factory
+        self.ui = ui
 
     def run(self):
         """
         ## Emit data những cam được quét để trở về hàm kết nối
         """
+        self.ui.btn_choose_cam.blockSignals(True)
+        self.ui.btn_choose_cam.clear()
+        self.ui.btn_choose_cam.addItem("None")
+
         available = []
-        for name, cam in self.cameras.items():
-            cam.connect()
+        for name, cam in self.cameras.items():                         
+            cam.connect(self.devices, self.tl_factory)
             if cam.connected:
+                self.ui.btn_choose_cam.addItem(name)
                 available.append(name)
         self.finished.emit(available)  # gửi lại kết quả
 
@@ -31,8 +39,8 @@ class CameraFunctions:
         - cameras: thừa kế toàn bộ giá trị Camera
         - timer: bộ đếm timer
         - canvas_Camera: phần thừa kế để hiện thị ảnh ở phần chính giữa để chạy phần camera Realtime
-        
         """
+
         self.ui = ui
         self.canvas_Camera = canvas_Camera
         self.timer_0 = timer_0
@@ -41,7 +49,7 @@ class CameraFunctions:
         self.active_cam = None
         self.active_name = None
 
-        self.ui.btn_check_cam.clicked.connect(self.check_cameras)
+        self.ui.btn_check_cam.clicked.connect(self.init_cam)
 
         self.ui.btn_trigsoft.clicked.connect(self.capture_frame)
 
@@ -49,6 +57,18 @@ class CameraFunctions:
         self.ui.btn_choose_cam.addItem("None")
         self.ui.btn_choose_cam.currentTextChanged.connect(self.select_camera)
         self.timer_0.timeout.connect(self.update_frame)
+    
+    def init_cam(self):
+        """
+        - Kiem tra so luong camera o trong thread main de tranh loi
+        - Sau do goi phuong thuc check_cameras()
+        """
+        self.timer_0.stop()
+        self.tl_factory = pylon.TlFactory.GetInstance()
+        self.devices = self.tl_factory.EnumerateDevices()
+        if not self.devices:
+            self.connected = False
+        self.check_cameras()
     
     def check_cameras(self):
         """
@@ -58,7 +78,7 @@ class CameraFunctions:
         """
         self.ui.btn_check_cam.setText("🔄Checking...")
 
-        self.thread = CameraChecker(self.cameras)
+        self.thread = CameraChecker(self.cameras, self.devices, self.tl_factory, self.ui)
         self.thread.finished.connect(self._on_check_done)
         self.thread.start()  # ✅ start mà không block UI
     
@@ -70,13 +90,13 @@ class CameraFunctions:
             - available: là thông tin cam nhận được từ Thread Scan Camera - singal
         """
         # ✅ Tương tự như sau khi join — bạn xử lý ở đây
-        self.ui.btn_choose_cam.blockSignals(True)
-        self.ui.btn_choose_cam.clear()
-        self.ui.btn_choose_cam.addItem("None")
+        # self.ui.btn_choose_cam.blockSignals(True)
+        # self.ui.btn_choose_cam.clear()
+        # self.ui.btn_choose_cam.addItem("None")
         self.ui.btn_check_cam.setText("Check Cam")
 
-        for name in available:
-            self.ui.btn_choose_cam.addItem(name)
+        # for name in available:
+        #     self.ui.btn_choose_cam.addItem(name)
         
         if self.active_name and self.active_name in available:
             self.ui.btn_choose_cam.setCurrentText(self.active_name)
@@ -91,6 +111,7 @@ class CameraFunctions:
         self.ui.btn_choose_cam.blockSignals(False)
         self.thread.quit()
         self.thread.wait()  # tương đương join nhưng không block UI
+        self.timer_0.start(30)
 
     def select_camera(self, name) -> None:
         """
